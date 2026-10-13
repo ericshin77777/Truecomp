@@ -1,0 +1,1202 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Truecomp</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=Martian+Mono:wght@400;500;700&display=swap">
+<style>
+:root{
+  --ground:#E9ECF1; --surface:#FFFFFF; --surface-2:#F4F6F9; --ink:#12151C; --muted:#586072; --faint:#8A91A0;
+  --line:#D3D8E1; --accent:#2B3FD6; --accent-soft:#E3E7FB; --accent-ink:#FFFFFF;
+  --series-2:#C7631A;
+  --sticker:#FFD23F; --sticker-ink:#1B1600;
+  --good:#157A4B; --good-soft:#DDF2E7; --warn:#9A6212; --warn-soft:#FBEBCF; --bad:#B8302A; --bad-soft:#F9E0DE;
+  --shadow:0 1px 2px rgba(18,21,28,.06),0 8px 24px -12px rgba(18,21,28,.18);
+  --display:"Archivo","Arial Narrow",system-ui,sans-serif; --body:"Archivo",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"Martian Mono",ui-monospace,"SFMono-Regular",Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  color-scheme:dark;
+  --ground:#0E1117; --surface:#161A22; --surface-2:#1C212B; --ink:#E7EAF1; --muted:#9BA3B5; --faint:#6D7587;
+  --line:#2A303C; --accent:#8C9BFF; --accent-soft:#232A4D; --accent-ink:#0E1117; --series-2:#E8893C;
+  --sticker:#F2C230; --sticker-ink:#1B1600;
+  --good:#46C88C; --good-soft:#15301F; --warn:#E3A948; --warn-soft:#342812; --bad:#F2716A; --bad-soft:#3A1917;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px -14px rgba(0,0,0,.6);
+}}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --ground:#0E1117; --surface:#161A22; --surface-2:#1C212B; --ink:#E7EAF1; --muted:#9BA3B5; --faint:#6D7587;
+  --line:#2A303C; --accent:#8C9BFF; --accent-soft:#232A4D; --accent-ink:#0E1117; --series-2:#E8893C;
+  --sticker:#F2C230; --sticker-ink:#1B1600;
+  --good:#46C88C; --good-soft:#15301F; --warn:#E3A948; --warn-soft:#342812; --bad:#F2716A; --bad-soft:#3A1917;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px -14px rgba(0,0,0,.6);
+}
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font:15px/1.5 var(--body);font-stretch:100%;-webkit-font-smoothing:antialiased}
+button,input,select{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.mono,.num{font-family:var(--mono);font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0}
+.eyebrow{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);font-weight:600}
+
+/* ---------- shell ---------- */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--ground) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.top-in{max-width:1280px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:16px}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--display);font-stretch:125%;font-weight:850;font-size:19px;letter-spacing:-.01em;white-space:nowrap}
+.brand-mark{width:22px;height:30px;border-radius:3px;background:var(--sticker);position:relative;box-shadow:inset 0 0 0 2px var(--ink)}
+.brand-mark::after{content:"";position:absolute;left:5px;right:5px;top:9px;height:2px;background:var(--ink);box-shadow:0 5px 0 var(--ink),0 10px 0 var(--ink)}
+.search{position:relative;flex:1;max-width:560px}
+.search input{width:100%;height:40px;border-radius:8px;border:1px solid var(--line);background:var(--surface);padding:0 12px 0 36px}
+.search svg{position:absolute;left:11px;top:11px;width:18px;height:18px;color:var(--faint)}
+.results{position:absolute;left:0;right:0;top:46px;background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow);padding:8px;max-height:min(460px,70vh);overflow:auto}
+.chips{display:flex;gap:6px;flex-wrap:wrap;padding:2px 2px 8px}
+.chip{border:1px solid var(--line);background:var(--surface-2);border-radius:999px;padding:3px 10px;font-size:12px;font-weight:600;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.res{display:flex;gap:10px;align-items:center;width:100%;text-align:left;border:0;background:none;padding:6px;border-radius:6px;cursor:pointer}
+.res:hover,.res.on{background:var(--accent-soft)}
+.res .cardart{width:30px;flex:none}
+.res-t{font-weight:600;line-height:1.25}
+.res-s{font-size:12px;color:var(--muted)}
+.res-p{margin-left:auto;font-size:12px}
+.sample-badge{font-size:11px;color:var(--muted);border:1px dashed var(--faint);border-radius:999px;padding:3px 9px;white-space:nowrap}
+
+.shell{max-width:1280px;margin:0 auto;padding-inline:16px;padding-block:20px 60px;display:grid;grid-template-columns:188px minmax(0,1fr);gap:28px}
+nav.rail{position:sticky;top:calc(env(safe-area-inset-top,0px) + 80px);align-self:start;display:flex;flex-direction:column;gap:2px}
+.navbtn{display:flex;flex-direction:column;align-items:flex-start;text-align:left;border:0;background:none;border-radius:8px;padding:9px 12px;cursor:pointer;color:var(--muted)}
+.navbtn b{font-weight:650;color:var(--ink);font-size:15px}
+.navbtn > span{font-size:12px}
+.navbtn:hover{background:var(--surface-2)}
+.navbtn[aria-current="page"]{background:var(--surface);box-shadow:var(--shadow)}
+.navbtn[aria-current="page"] b{color:var(--accent)}
+.nav-count{font-family:var(--mono);font-size:10px;background:var(--sticker);color:var(--sticker-ink);border-radius:3px;padding:1px 5px;margin-left:6px;vertical-align:1px}
+
+@media (max-width:860px){
+  .shell{grid-template-columns:minmax(0,1fr);gap:14px;padding-block:12px 60px}
+  nav.rail{position:static;flex-direction:row;overflow-x:auto;gap:4px;margin-inline:-16px;padding-inline:16px;scrollbar-width:none}
+  .navbtn{flex:none;padding:7px 12px}
+  .navbtn > span{display:none}
+  .sample-badge{display:none}
+  .brand span.word{display:none}
+}
+
+/* ---------- panels ---------- */
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px}
+.panel h2{font-size:16px;font-stretch:112%;font-weight:750}
+.panel-h{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.panel-h p{margin:2px 0 0;color:var(--muted);font-size:13px}
+.grid2{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:16px}
+@media (max-width:1060px){.grid2{grid-template-columns:minmax(0,1fr)}}
+.stack{display:flex;flex-direction:column;gap:16px}
+.view-h{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap}
+.view-h h1{font-size:clamp(26px,4vw,36px);font-stretch:125%;font-weight:850;letter-spacing:-.02em;line-height:1.05}
+.view-h p{margin:6px 0 0;color:var(--muted);max-width:62ch}
+
+.btn{display:inline-flex;align-items:center;gap:8px;height:38px;padding:0 14px;border-radius:8px;border:1px solid var(--line);background:var(--surface);font-weight:600;cursor:pointer;white-space:nowrap}
+.btn:hover{border-color:var(--faint)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.sticker{background:var(--sticker);color:var(--sticker-ink);border-color:transparent}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;padding:2px;background:var(--surface-2);gap:2px;flex-wrap:wrap}
+.seg button{border:0;background:none;padding:5px 11px;border-radius:6px;font-weight:650;font-size:13px;cursor:pointer;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+
+.pill{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:2px 9px;font-size:12px;font-weight:650;white-space:nowrap}
+.pill::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+.pill.good{background:var(--good-soft);color:var(--good)}
+.pill.warn{background:var(--warn-soft);color:var(--warn)}
+.pill.bad{background:var(--bad-soft);color:var(--bad)}
+.pill.neutral{background:var(--surface-2);color:var(--muted)}
+
+/* ---------- card art ---------- */
+.cardart{--h:210;container-type:inline-size;aspect-ratio:63/88;max-width:100%;border-radius:5%/3.6%;padding:4.5%;display:flex;background:#E8C43C;position:relative;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,.2)}
+.cardart.magic{background:#15161A}
+.cardart.sports{background:#F3F3F1;box-shadow:inset 0 0 0 1px #cfcfcf,0 1px 2px rgba(0,0,0,.2)}
+.ca-in{flex:1;border-radius:3.5%;background:linear-gradient(165deg,hsl(var(--h) 62% 76%),hsl(var(--h) 52% 50%));display:flex;flex-direction:column;padding:6%;gap:4%;color:#111;min-width:0}
+.magic .ca-in{background:linear-gradient(165deg,hsl(var(--h) 22% 70%),hsl(var(--h) 26% 38%))}
+.sports .ca-in{background:linear-gradient(200deg,hsl(var(--h) 55% 58%),hsl(var(--h) 60% 30%));color:#fff}
+.ca-name{font-family:var(--display);font-weight:800;font-stretch:88%;font-size:9.5cqw;line-height:1.05;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ca-win{flex:0 0 46%;border-radius:2%;background:radial-gradient(circle at 50% 62%,hsl(var(--h) 90% 88%),hsl(var(--h) 55% 34%) 78%);border:1.5cqw solid rgba(255,255,255,.55);display:grid;place-items:center;font-family:var(--display);font-stretch:125%;font-weight:900;font-size:24cqw;color:rgba(255,255,255,.9);text-shadow:0 1cqw 3cqw rgba(0,0,0,.25)}
+.ca-foot{margin-top:auto;font-family:var(--mono);font-size:6.5cqw;opacity:.85;display:flex;justify-content:space-between;gap:4px;white-space:nowrap;overflow:hidden}
+.ca-line{height:3cqw;border-radius:2px;background:rgba(0,0,0,.14)}
+.ca-line.s{width:62%}
+
+/* hero card with holo tilt */
+.hero-card{perspective:900px;width:min(230px,100%);justify-self:center}
+.hero-card .cardart{--rx:0deg;--ry:0deg;--mx:50%;--my:50%;transform:rotateY(var(--rx)) rotateX(var(--ry));transition:transform .5s cubic-bezier(.2,.8,.2,1);border-radius:4.5%/3.3%;box-shadow:0 20px 40px -18px rgba(0,0,0,.55),0 2px 4px rgba(0,0,0,.2)}
+.hero-card .cardart.live{transition:transform .08s linear}
+.holo{position:absolute;inset:0;pointer-events:none;mix-blend-mode:color-dodge;opacity:.5;
+  background:repeating-linear-gradient(115deg,transparent 0%,hsla(190,100%,70%,.55) 7%,hsla(290,100%,72%,.5) 14%,hsla(48,100%,70%,.55) 21%,transparent 30%);
+  background-size:260% 260%;background-position:var(--mx) var(--my)}
+.glare{position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at var(--mx) var(--my),rgba(255,255,255,.45),transparent 45%);mix-blend-mode:overlay}
+@media (prefers-reduced-motion:reduce){.hero-card .cardart{transition:none;transform:none!important}}
+
+/* ---------- price view ---------- */
+.price-top{display:grid;grid-template-columns:260px minmax(0,1fr);gap:28px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:24px}
+@media (max-width:700px){.price-top{grid-template-columns:minmax(0,1fr);padding:18px}}
+.pt-title{font-size:clamp(28px,4.4vw,44px);font-stretch:118%;font-weight:850;letter-spacing:-.025em;line-height:1;margin:6px 0 14px}
+.fair-row{display:flex;flex-wrap:wrap;align-items:flex-end;gap:10px 28px;margin-top:18px}
+.fair-big{font-family:var(--mono);font-weight:700;font-size:clamp(34px,5vw,52px);letter-spacing:-.05em;line-height:1}
+.fair-lbl{font-size:12px;color:var(--muted);margin-bottom:4px;font-weight:600}
+.range-bar{flex:1;min-width:220px;max-width:420px}
+.rb-track{position:relative;height:30px}
+.rb-line{position:absolute;left:0;right:0;top:14px;height:2px;background:var(--line)}
+.rb-band{position:absolute;top:7px;height:16px;border-radius:4px;background:var(--accent-soft);border:1.5px solid var(--accent)}
+.rb-mark{position:absolute;top:2px;width:2px;height:26px;background:var(--ink);border-radius:1px}
+.rb-lbls{display:flex;justify-content:space-between;font-family:var(--mono);font-size:12px;color:var(--muted)}
+.facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-top:20px}
+.fact{background:var(--surface);padding:12px 14px;display:flex;flex-direction:column;gap:4px}
+.fact .v{font-family:var(--mono);font-size:18px;font-weight:700;letter-spacing:-.04em}
+.fact .k{font-size:12px;color:var(--muted);font-weight:600}
+.fact .s{font-size:12px;color:var(--muted)}
+@media (max-width:560px){.facts{grid-template-columns:minmax(0,1fr)}}
+.why-line{margin:14px 0 0;color:var(--muted);font-size:13.5px;max-width:70ch}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+.sticker-inline{font-family:var(--mono);background:var(--sticker);color:var(--sticker-ink);padding:1px 6px;border-radius:3px;font-weight:700}
+
+.chart-wrap{position:relative}
+.chart-wrap svg{display:block;width:100%;height:auto;overflow:visible}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:8px}
+.legend i{display:inline-block;width:10px;height:10px;margin-right:6px;vertical-align:-1px}
+.tip{position:fixed;z-index:50;pointer-events:none;background:var(--ink);color:var(--surface);font-size:12px;line-height:1.4;padding:8px 10px;border-radius:8px;max-width:240px;box-shadow:var(--shadow)}
+.tip b{font-family:var(--mono)}
+
+.src-row{display:grid;grid-template-columns:120px minmax(0,1fr) 78px;align-items:center;gap:12px;padding:10px 0;border-top:1px solid var(--line)}
+.src-row:first-of-type{border-top:0}
+.src-name{font-weight:650;font-size:14px}
+.src-note{font-size:12px;color:var(--muted);line-height:1.35}
+.src-val{text-align:right;font-family:var(--mono);font-size:14px;font-weight:600}
+.src-scale{position:relative;height:18px;margin-top:4px}
+.src-scale .band{position:absolute;top:3px;height:12px;background:var(--accent-soft);border-radius:3px}
+.src-scale .dot{position:absolute;top:3px;width:12px;height:12px;border-radius:50%;margin-left:-6px;background:var(--ink);box-shadow:0 0 0 2px var(--surface)}
+.src-scale .dot.off{background:var(--warn)}
+@media (max-width:520px){.src-row{grid-template-columns:minmax(0,1fr) 70px}.src-row .src-mid{grid-column:1/-1;grid-row:2}}
+
+.tbl-wrap{overflow-x:auto;margin-inline:-4px}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:650;text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:8px;border-bottom:1px solid var(--line);vertical-align:middle}
+tr:last-child td{border-bottom:0}
+td.r,th.r{text-align:right}
+tr.excl td{color:var(--faint)}
+tr.excl td .strike{text-decoration:line-through}
+.wbar{display:inline-block;height:6px;border-radius:3px;background:var(--accent);vertical-align:middle}
+.cond-tag{font-family:var(--mono);font-size:11px;font-weight:700;border:1px solid var(--line);border-radius:4px;padding:1px 5px;background:var(--surface-2)}
+.linkbtn{border:0;background:none;color:var(--accent);font-weight:650;cursor:pointer;padding:0}
+
+.field{display:flex;flex-direction:column;gap:5px;min-width:0}
+.field label{font-size:12px;font-weight:650;color:var(--muted)}
+.field input[type="number"],.field input[type="text"],.field select{height:38px;border:1px solid var(--line);border-radius:8px;background:var(--surface);padding:0 10px;width:100%}
+.money-in{position:relative}
+.money-in::before{content:"$";position:absolute;left:10px;top:8px;color:var(--faint);font-family:var(--mono)}
+.money-in input{padding-left:24px!important;font-family:var(--mono)}
+input[type="range"]{width:100%;accent-color:var(--accent)}
+.fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.verdict-box{margin-top:14px;border-radius:10px;padding:14px;background:var(--surface-2)}
+.verdict-box h3{font-size:18px;font-stretch:112%;font-weight:800;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.verdict-box p{margin:6px 0 0;font-size:13.5px;color:var(--muted)}
+.ev-rows{display:grid;grid-template-columns:1fr auto;gap:4px 12px;font-size:13px;margin-top:10px}
+.ev-rows .num{text-align:right}
+.ev-rows .tot{font-weight:700;border-top:1px solid var(--line);padding-top:4px}
+
+/* ---------- scan ---------- */
+.scan-layout{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:16px;align-items:start}
+@media (max-width:1000px){.scan-layout{grid-template-columns:minmax(0,1fr)}}
+.binder{background:linear-gradient(180deg,#2E3440,#252A34);border-radius:14px;padding:16px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;position:relative}
+.binder.photo{background-size:cover;background-position:center}
+.binder.photo::before{content:"";position:absolute;inset:0;border-radius:14px;background:rgba(10,12,18,.55)}
+.pocket{position:relative;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);border-radius:8px;padding:8px;display:flex;flex-direction:column;gap:8px;color:#EEF0F5}
+.pocket .cardart{width:100%}
+.pk-meta{display:flex;justify-content:space-between;align-items:center;gap:6px;flex-wrap:wrap}
+.pk-name{font-size:12px;font-weight:650;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pk-price{font-family:var(--mono);font-size:13px;font-weight:700}
+.cond-btn{font-family:var(--mono);font-size:11px;font-weight:700;border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.1);color:#fff;border-radius:5px;padding:2px 7px;cursor:pointer}
+.cond-btn.changed{background:var(--sticker);color:var(--sticker-ink);border-color:transparent}
+.pk-hit{position:absolute;top:14px;left:14px;font-family:var(--mono);font-size:10px;background:rgba(0,0,0,.65);color:#fff;border-radius:3px;padding:1px 5px}
+@media (max-width:520px){.binder{gap:6px;padding:8px}.pocket{padding:4px;gap:4px}.pk-name{display:none}.pk-hit{display:none}.pk-price{font-size:11px}}
+.drop{border:1.5px dashed var(--faint);border-radius:10px;padding:16px;text-align:center;color:var(--muted);font-size:13px;cursor:pointer;display:block}
+.drop:hover,.drop.over{border-color:var(--accent);color:var(--ink)}
+.drop input{position:absolute;width:1px;height:1px;opacity:0}
+.tot-big{font-family:var(--mono);font-size:30px;font-weight:700;letter-spacing:-.05em}
+.note{font-size:12.5px;color:var(--muted);line-height:1.45}
+
+/* ---------- reprice ---------- */
+.summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.summary div{background:var(--surface);padding:14px 16px}
+.summary .v{font-family:var(--mono);font-size:24px;font-weight:700;letter-spacing:-.05em}
+.summary .k{font-size:12px;color:var(--muted);font-weight:600}
+@media (max-width:700px){.summary{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.rules{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+@media (max-width:760px){.rules{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.chg-up{color:var(--good);font-weight:700}
+.chg-dn{color:var(--bad);font-weight:700}
+tr.needs td{background:color-mix(in srgb,var(--sticker) 12%,transparent)}
+.loc{font-size:12px;color:var(--muted);white-space:nowrap}
+.sheet{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;background:var(--surface-2);border-radius:10px;padding:12px}
+.label{background:var(--sticker);color:var(--sticker-ink);border-radius:5px;padding:8px 10px;display:flex;flex-direction:column;gap:2px;box-shadow:0 1px 0 rgba(0,0,0,.15)}
+.label .lp{font-family:var(--mono);font-weight:700;font-size:20px;letter-spacing:-.05em;line-height:1.1}
+.label .ln{font-size:11.5px;font-weight:650;line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.label .lm{font-family:var(--mono);font-size:10px;opacity:.75;display:flex;justify-content:space-between}
+.label .was{text-decoration:line-through;opacity:.6}
+
+/* ---------- deal ---------- */
+.gauge{position:relative;margin-top:22px;padding-top:26px}
+.g-track{display:flex;height:14px;border-radius:7px;overflow:hidden;gap:2px}
+.g-track div{height:100%}
+.g-mark{position:absolute;top:0;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;transition:left .3s}
+.g-mark span{font-family:var(--mono);font-size:12px;font-weight:700;background:var(--ink);color:var(--surface);border-radius:4px;padding:1px 6px}
+.g-mark i{width:2px;height:22px;background:var(--ink)}
+.g-lbls{position:relative;height:30px;font-size:11px;color:var(--muted);margin-top:6px}
+.g-lbls span{position:absolute;transform:translateX(-50%);text-align:center;white-space:nowrap}
+.script{margin-top:12px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px;font-size:14px;line-height:1.5}
+.picked{display:flex;gap:12px;align-items:center;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--surface-2)}
+.picked .cardart{width:44px;flex:none}
+
+/* ---------- why ---------- */
+.why td{vertical-align:top;font-size:13.5px}
+.why td:first-child{font-weight:600;max-width:32ch}
+.who{font-family:var(--mono);font-size:12px;white-space:nowrap}
+.callout{border-left:3px solid var(--warn)}
+.callout p{margin:6px 0 0;color:var(--muted);font-size:14px;max-width:70ch}
+
+/* ---------- tokens, condition check, community ---------- */
+.tok-chip{display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:12px;font-weight:700;background:var(--sticker);color:var(--sticker-ink);border-radius:999px;padding:5px 11px;border:0;cursor:pointer;white-space:nowrap}
+.tok-chip i{width:11px;height:11px;border-radius:50%;border:2px solid currentColor;box-shadow:inset 0 0 0 1.5px var(--sticker),inset 0 0 0 4px currentColor}
+.banner{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:12px 14px;font-size:13.5px;color:var(--muted)}
+.banner b{color:var(--ink)}
+.cond-layout{display:grid;grid-template-columns:270px minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:1000px){.cond-layout{grid-template-columns:minmax(0,1fr)}}
+.lst{display:flex;flex-direction:column;gap:6px}
+.lst-item{display:flex;gap:10px;align-items:center;text-align:left;width:100%;border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:8px;cursor:pointer}
+.lst-item:hover{border-color:var(--faint)}
+.lst-item[aria-current="true"]{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.lst-item .cardart{width:38px;flex:none}
+.lst-t{font-weight:650;font-size:13.5px;line-height:1.25}
+.lst-s{font-size:12px;color:var(--muted);display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:4px}
+@media (max-width:1000px){.lst{flex-direction:row;overflow-x:auto;margin-inline:-16px;padding-inline:16px;padding-bottom:4px}.lst-item{flex:0 0 240px}}
+.ldetail{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:1240px){.ldetail{grid-template-columns:minmax(0,1fr)}}
+.stage{background:radial-gradient(120% 90% at 30% 15%,#6a7380,#2a2f37);border-radius:12px;padding:22px;display:grid;place-items:center;min-height:380px}
+.ph-card{position:relative;width:min(230px,70%);border-radius:5%/3.6%;overflow:hidden;box-shadow:0 18px 30px -14px rgba(0,0,0,.75)}
+.ph-card .cardart{box-shadow:none;border-radius:0}
+.wear{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.cardback{aspect-ratio:63/88;padding:4.5%;background:#1d3f8f;display:flex}
+.cb-in{flex:1;border-radius:3%;background:radial-gradient(circle at 50% 50%,#3f7be0 0 16%,#244fae 17% 28%,#1a3a86 29% 42%,#2a5bc0 43% 57%,#18357c 58%);display:grid;place-items:center}
+.cb-in span{width:44%;aspect-ratio:1;border-radius:50%;border:5px solid rgba(255,255,255,.7);background:rgba(255,255,255,.08)}
+.zooms{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;width:min(330px,100%)}
+.zoom{position:relative;aspect-ratio:1;overflow:hidden;border-radius:8px;background:#2a2f37}
+.zoom .ph-card{position:absolute;width:300%;box-shadow:none;border-radius:0}
+.zoom b{position:absolute;left:6px;bottom:6px;font-size:10px;font-family:var(--mono);background:rgba(0,0,0,.65);color:#fff;border-radius:3px;padding:1px 5px;z-index:2;font-weight:500}
+.flags{display:flex;flex-wrap:wrap;gap:6px}
+.dist{display:flex;flex-direction:column;gap:7px}
+.dist-row{display:grid;grid-template-columns:40px minmax(0,1fr) 40px;gap:8px;align-items:center;font-size:12px}
+.dist-mid{display:flex;align-items:center;gap:8px;min-width:0;background:var(--surface-2);border-radius:0 4px 4px 0}
+.dist-bar{height:14px;border-radius:0 4px 4px 0;background:var(--accent);min-width:0}
+.dist-bar.ok{background:var(--good)}
+.dist-mid em{font-style:normal;font-size:11px;color:var(--muted);white-space:nowrap}
+.note-row{display:grid;grid-template-columns:24px minmax(0,1fr);gap:8px;font-size:13px}
+.note-row img,.msg img,.lb-row img{border-radius:50%;background:var(--line)}
+.note-row img{width:24px;height:24px}
+.rules-list{margin:8px 0 0;padding-left:18px;display:flex;flex-direction:column;gap:6px;color:var(--muted);font-size:13.5px;max-width:80ch}
+.rules-list b{color:var(--ink)}
+.chat-layout{display:grid;grid-template-columns:200px minmax(0,1fr) 260px;gap:16px;align-items:start}
+@media (max-width:1180px){.chat-layout{grid-template-columns:190px minmax(0,1fr)}.chat-side{grid-column:1/-1}}
+@media (max-width:760px){.chat-layout{grid-template-columns:minmax(0,1fr)}.rooms{flex-direction:row!important;overflow-x:auto;margin-inline:-16px;padding-inline:16px}}
+.rooms{display:flex;flex-direction:column;gap:2px}
+.room{border:0;background:none;text-align:left;padding:7px 10px;border-radius:8px;cursor:pointer;color:var(--muted);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:none;max-width:100%}
+.room:hover{background:var(--surface-2)}
+.room[aria-current="true"]{background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
+.chat{display:flex;flex-direction:column;height:min(640px,72vh);padding:0;overflow:hidden}
+.chat-h{padding:12px 16px;border-bottom:1px solid var(--line)}
+.msgs{flex:1;overflow-y:auto;padding:14px 16px;display:flex;flex-direction:column;gap:14px}
+.msg{display:grid;grid-template-columns:30px minmax(0,1fr);gap:10px}
+.msg img{width:30px;height:30px}
+.msg-h{font-size:12.5px;display:flex;gap:8px;align-items:baseline}
+.msg-h b{font-size:13.5px}
+.msg-t{white-space:pre-wrap;overflow-wrap:anywhere;font-size:14px}
+.composer{display:flex;gap:8px;padding:12px;border-top:1px solid var(--line)}
+.composer input{flex:1;height:40px;border:1px solid var(--line);border-radius:8px;padding:0 12px;background:var(--surface);min-width:0}
+.lb-row{display:grid;grid-template-columns:18px 26px minmax(0,1fr) auto;gap:8px;align-items:center;padding:8px 0;border-top:1px solid var(--line);font-size:13px}
+.lb-row img{width:26px;height:26px}
+.ellip{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--surface);padding:10px 16px;border-radius:10px;font-weight:600;font-size:14px;z-index:60;box-shadow:var(--shadow)}
+</style>
+
+<header class="top">
+  <div class="top-in">
+    <div class="brand"><div class="brand-mark" aria-hidden="true"></div><span class="word">Truecomp</span></div>
+    <div class="search" id="search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="q" type="text" autocomplete="off" placeholder="Search singles: name, set, or number like 4/102" aria-label="Search cards">
+      <div class="results" id="results" hidden></div>
+    </div>
+    <span class="sample-badge" title="Prices are generated sample data for this prototype">Sample prices · not live</span>
+    <button class="tok-chip" id="tok" data-nav="cond" hidden title="Your tokens from verified condition calls"><i aria-hidden="true"></i><span id="tok-n">0 TC</span></button>
+  </div>
+</header>
+
+<div class="shell">
+  <nav class="rail" id="rail" aria-label="Sections"></nav>
+  <main id="main"></main>
+</div>
+<div class="tip" id="tip" hidden></div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+/* ======================= data ======================= */
+const CATALOG = [
+  {id:'charizard-base',name:'Charizard',var:'Holo',set:'Base Set (Unlimited)',num:'4/102',year:1999,game:'Pokémon',era:'vintage',nm:420,psa8:700,psa9:1400,psa10:6800,liq:22,trend:6,vol:.2,h:14,gl:'CH'},
+  {id:'blastoise-base',name:'Blastoise',var:'Holo',set:'Base Set (Unlimited)',num:'2/102',year:1999,game:'Pokémon',era:'vintage',nm:150,psa8:260,psa9:520,psa10:3200,liq:12,trend:2,vol:.22,h:205,gl:'BL'},
+  {id:'lugia-neo',name:'Lugia',var:'Holo',set:'Neo Genesis (Unlimited)',num:'9/111',year:2000,game:'Pokémon',era:'vintage',nm:260,psa8:480,psa9:1100,psa10:9500,liq:5,trend:-3,vol:.28,h:228,gl:'LU'},
+  {id:'gengar-fossil',name:'Gengar',var:'Holo',set:'Fossil (Unlimited)',num:'5/62',year:1999,game:'Pokémon',era:'vintage',nm:55,psa8:110,psa9:230,psa10:1200,liq:10,trend:4,vol:.26,h:272,gl:'GE'},
+  {id:'umbreon-vmax',name:'Umbreon VMAX',var:'Alternate Art',set:'Evolving Skies',num:'215/203',year:2021,game:'Pokémon',era:'modern',nm:1450,psa8:1250,psa9:1500,psa10:2800,liq:60,trend:4,vol:.07,h:250,gl:'UM'},
+  {id:'giratina-v',name:'Giratina V',var:'Alternate Art',set:'Lost Origin',num:'186/196',year:2022,game:'Pokémon',era:'modern',nm:380,psa8:330,psa9:400,psa10:900,liq:45,trend:-5,vol:.08,h:285,gl:'GI'},
+  {id:'pikachu-felt',name:'Pikachu with Grey Felt Hat',var:'Promo',set:'SV Black Star Promos',num:'085',year:2023,game:'Pokémon',era:'modern',nm:520,psa8:480,psa9:600,psa10:1100,liq:70,trend:9,vol:.09,h:48,gl:'PI'},
+  {id:'mew-paf',name:'Mew ex',var:'Special Illustration Rare',set:'Paldean Fates',num:'232/091',year:2024,game:'Pokémon',era:'modern',nm:38,psa8:40,psa9:55,psa10:150,liq:100,trend:-12,vol:.1,h:320,gl:'ME'},
+  {id:'bulbasaur-151',name:'Bulbasaur',var:'Illustration Rare',set:'Scarlet & Violet 151',num:'166/165',year:2023,game:'Pokémon',era:'modern',nm:14,psa8:20,psa9:30,psa10:90,liq:90,trend:-2,vol:.1,h:130,gl:'BU'},
+  {id:'pikachu-151',name:'Pikachu',var:'Reverse Holo',set:'Scarlet & Violet 151',num:'025/165',year:2023,game:'Pokémon',era:'modern',nm:2.5,psa8:12,psa9:18,psa10:45,liq:120,trend:0,vol:.15,h:52,gl:'PI'},
+  {id:'sheoldred-dmu',name:'Sheoldred, the Apocalypse',var:'Regular',set:'Dominaria United',num:'107',year:2022,game:'Magic',era:'modern',nm:72,psa8:80,psa9:110,psa10:220,liq:80,trend:-8,vol:.07,h:275,gl:'SH'},
+  {id:'ragavan-mh2',name:'Ragavan, Nimble Pilferer',var:'Regular',set:'Modern Horizons 2',num:'138',year:2021,game:'Magic',era:'modern',nm:48,psa8:60,psa9:85,psa10:180,liq:55,trend:-4,vol:.08,h:10,gl:'RA'},
+  {id:'solring-rev',name:'Sol Ring',var:'Regular',set:'Revised Edition',num:'274',year:1994,game:'Magic',era:'vintage',nm:95,psa8:180,psa9:400,psa10:1200,liq:18,trend:3,vol:.2,h:40,gl:'SR'},
+  {id:'wemby-prizm',name:'Victor Wembanyama',var:'Rookie · Base',set:'2023-24 Panini Prizm',num:'#136',year:2023,game:'Sports',era:'modern',nm:45,psa8:45,psa9:70,psa10:230,liq:150,trend:-10,vol:.12,h:265,gl:'VW'},
+  {id:'ohtani-update',name:'Shohei Ohtani',var:'Rookie · Base',set:'2018 Topps Update',num:'US285',year:2018,game:'Sports',era:'modern',nm:30,psa8:40,psa9:70,psa10:260,liq:100,trend:5,vol:.12,h:215,gl:'SO'},
+  {id:'griffey-ud',name:'Ken Griffey Jr.',var:'Rookie',set:'1989 Upper Deck',num:'#1',year:1989,game:'Sports',era:'vintage',nm:90,psa8:110,psa9:300,psa10:2100,liq:40,trend:1,vol:.2,h:195,gl:'KG'},
+];
+const BY = Object.fromEntries(CATALOG.map(c=>[c.id,c]));
+const COND = ['NM','LP','MP','HP','DMG'];
+const COND_NAME = {NM:'Near Mint',LP:'Lightly Played',MP:'Moderately Played',HP:'Heavily Played',DMG:'Damaged'};
+const MULT = {modern:{NM:1,LP:.85,MP:.7,HP:.5,DMG:.35}, vintage:{NM:1,LP:.72,MP:.52,HP:.36,DMG:.24}};
+const mult = (c,k)=>MULT[c.era][k];
+
+function hash(s){let h=2166136261;for(const ch of s){h^=ch.charCodeAt(0);h=Math.imul(h,16777619)}return h>>>0}
+function rng(seed){return function(){seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+CATALOG.forEach(c=>{const r=rng(hash(c.id+'bias'));c.bias=(r()-.4)*(c.era==='vintage'?.34:.09);c.colBias=(r()-.5)*.04});
+
+const money = v => v==null||!isFinite(v) ? '—' : v>=1000 ? '$'+Math.round(v).toLocaleString('en-US') : v>=100 ? '$'+Math.round(v) : '$'+v.toFixed(2);
+const pct = v => (v>0?'+':'')+Math.round(v*100)+'%';
+const esc = s => String(s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+
+/* ======================= comp engine ======================= */
+const compCache = {};
+function comps(card){
+  if(compCache[card.id]) return compCache[card.id];
+  const r = rng(hash(card.id));
+  const g = ()=>{let u=0;while(!u)u=r();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*r())};
+  const n = Math.max(8,Math.min(36,Math.round(card.liq*1.6)));
+  const vint = card.era==='vintage';
+  const dist = vint?[.3,.3,.2,.13,.07]:[.62,.2,.1,.05,.03];
+  const out=[];
+  for(let i=0;i<n;i++){
+    const days=Math.floor(r()*90);
+    let x=r(),ci=0; while(ci<4&&x>dist[ci]){x-=dist[ci];ci++}
+    const cond=COND[ci];
+    const src=r()<.68?'eBay':'TCGplayer';
+    const photo=src==='eBay'?r()<.85:false;
+    const tf=Math.pow(1+card.trend/100,-days/90);
+    let price=card.nm*tf*mult(card,cond)*Math.exp(g()*card.vol*(src==='TCGplayer'&&vint?1.4:1));
+    let note='',lot=false; const o=r();
+    if(o<.04){price*=2.1;note='Lot of 3 cards';lot=true}
+    else if(o<.09){price*=.45;note='Best offer, 1-day auction'}
+    else if(o<.12){price*=1.8;note='Titled "mint", no back photo'}
+    out.push({days,cond,src,photo,price:Math.max(.25,Math.round(price*100)/100),note,lot});
+  }
+  out.sort((a,b)=>a.days-b.days);
+  return compCache[card.id]=out;
+}
+function wq(rows,q){
+  const s=[...rows].sort((a,b)=>a.norm-b.norm); const tot=s.reduce((t,r)=>t+r.w,0);
+  let c=0; for(const r of s){c+=r.w;if(c>=q*tot)return r.norm} return s.length?s[s.length-1].norm:NaN;
+}
+const median = a=>{const s=[...a].sort((x,y)=>x-y);const m=s.length>>1;return s.length?(s.length%2?s[m]:(s[m-1]+s[m])/2):NaN};
+function consensus(card,cond){
+  const m=mult(card,cond);
+  const rows=comps(card).map(c=>{
+    const d=Math.abs(COND.indexOf(c.cond)-COND.indexOf(cond));
+    const wc=d===0?1:d===1?.45:.15, wr=Math.pow(.5,c.days/21), wp=c.photo?1:.6;
+    return {...c,norm:c.price*m/mult(card,c.cond),w:wr*wc*wp,wc,wr,wp,excl:c.lot?'Multi-card lot':null};
+  });
+  const live=rows.filter(r=>!r.excl);
+  const med0=wq(live,.5);
+  const logs=live.map(r=>Math.abs(Math.log(r.norm/med0)));
+  const mad=median(logs)||.05;
+  live.forEach((r,i)=>{if(logs[i]>Math.max(.35,3*mad*1.4826))r.excl=r.norm>med0?'Outlier, high':'Outlier, low'});
+  const used=rows.filter(r=>!r.excl);
+  const fair=wq(used,.5),lo=wq(used,.2),hi=wq(used,.8),listAt=wq(used,.7);
+  const sw=used.reduce((t,r)=>t+r.w,0),sw2=used.reduce((t,r)=>t+r.w*r.w,0);
+  const effN=sw*sw/sw2, spread=(hi-lo)/fair;
+  const exact=used.filter(r=>r.cond===cond&&r.days<=30).length;
+  const score=Math.min(1,effN/6)*(1-Math.min(.7,spread));
+  const conf=score>.55?{k:'good',l:'High'}:score>.32?{k:'warn',l:'Medium'}:{k:'bad',l:'Low'};
+  return {rows,used,fair,lo,hi,listAt,effN,spread,exact,conf,n:rows.length};
+}
+function sources(card,cond,cons){
+  const m=mult(card,cond);
+  const tcg=card.nm*(1+card.bias)*m;
+  const eb=rowsMedian(comps(card).filter(c=>c.src==='eBay'&&c.cond===cond&&!c.lot).map(c=>c.price));
+  const col=card.nm*(1+card.bias+card.colBias)*m;
+  return [
+    {name:'TCGplayer',v:tcg,note:card.era==='vintage'?'Market price. "Last sold" has no photos or verified condition, so vintage drifts.':'Market price. Current for modern, liquid cards.'},
+    {name:'eBay sold',v:eb,note:isFinite(eb)?'Plain median of sold listings in this condition, lots and junk included.':'No sold listings in this exact condition in 90 days.'},
+    {name:'Collectr',v:col,note:'Portfolio tracker. Its market data largely mirrors TCGplayer.'},
+  ];
+}
+function rowsMedian(a){return a.length?median(a):NaN}
+
+/* ======================= state ======================= */
+const LS='truecomp.v1';
+let saved={}; try{saved=JSON.parse(localStorage.getItem(LS)||'{}')||{}}catch(e){}
+const S={
+  view:saved.view||'price', cardId:saved.cardId||'charizard-base', cond:'NM', filter:'All',
+  rules:saved.rules||{th:10,min:2,round:'show',dir:'both'},
+  inv:saved.inv||null, scan:null, scanPhoto:null,
+  deal:{mode:'sell',offer:null,vOffer:null,vSticker:null,floor:85},
+  grade:{fee:25,months:9,p10:20,p9:50}, showAll:false,
+  lid:null, side:'front', ev:{}, adm:{}, room:'general', draft:{}, stick:true
+};
+function persist(){try{localStorage.setItem(LS,JSON.stringify({view:S.view,cardId:S.cardId,rules:S.rules,inv:S.inv}))}catch(e){}}
+
+function roundPrice(v,rule){
+  if(rule==='50c')return Math.max(.5,Math.round(v*2)/2);
+  if(rule==='1')return Math.max(1,Math.round(v));
+  if(rule==='99')return Math.max(.99,Math.round(v)-.01);
+  if(v<5)return Math.max(.5,Math.round(v*2)/2);
+  return v<50?Math.round(v):Math.round(v/5)*5;
+}
+function seedInventory(){
+  const spec=[
+    ['umbreon-vmax','NM','Case 1 · top row',1.0],['pikachu-felt','NM','Case 1 · top row',.86],['charizard-base','LP','Case 1 · top row',1.22],
+    ['giratina-v','NM','Case 1 · 2nd row',1.12],['lugia-neo','MP','Case 1 · 2nd row',.8],['blastoise-base','LP','Case 2 · vintage',1.03],
+    ['gengar-fossil','NM','Case 2 · vintage',.84],['griffey-ud','NM','Case 2 · vintage',1.0],['solring-rev','LP','Case 2 · vintage',1.18],
+    ['sheoldred-dmu','NM','Binder A · p.1 slot 2',1.14],['ragavan-mh2','NM','Binder A · p.1 slot 5',1.0],['mew-paf','NM','Binder A · p.2 slot 1',1.3],
+    ['wemby-prizm','NM','Binder A · p.2 slot 7',1.16],['ohtani-update','NM','Binder A · p.3 slot 3',.9],['bulbasaur-151','NM','$10–20 box',1.0],['pikachu-151','NM','$1–5 box',1.0],
+  ];
+  return spec.map(([id,cond,loc,f],i)=>({key:id+'-'+i,id,cond,loc,sticker:roundPrice(consensus(BY[id],cond).listAt*f,'show')}));
+}
+if(!S.inv)S.inv=seedInventory();
+const SAMPLE_PAGE=[['mew-paf','NM'],['bulbasaur-151','NM'],['pikachu-151','NM'],['giratina-v','NM'],['gengar-fossil','LP'],['ohtani-update','NM'],['sheoldred-dmu','NM'],['wemby-prizm','NM'],['blastoise-base','MP']];
+S.scan=SAMPLE_PAGE.map(([id,cond])=>({id,cond,orig:cond}));
+
+/* ======================= components ======================= */
+function art(card,cls='',style=''){
+  const g=card.game==='Magic'?'magic':card.game==='Sports'?'sports':'';
+  return `<div class="cardart ${g} ${cls}" style="--h:${card.h};${style}" aria-hidden="true"><div class="ca-in">
+    <div class="ca-name">${esc(card.name)}</div><div class="ca-win">${card.gl}</div>
+    <div class="ca-line"></div><div class="ca-line s"></div>
+    <div class="ca-foot"><span>${esc(card.num)}</span><span>${card.year}</span></div></div>
+    ${cls.includes('big')?'<div class="holo"></div><div class="glare"></div>':''}</div>`;
+}
+const NAV=[
+  ['price','Price check','One defensible number'],
+  ['scan','Binder scan','9 cards per photo'],
+  ['reprice','Reprice','Resticker only what moved'],
+  ['deal','Deal check','Spot a lowball'],
+  ['cond','Condition check','Call it, earn tokens'],
+  ['community','Community','Ask the crowd'],
+  ['why','Why Truecomp','Built from interviews'],
+];
+function repriceList(){
+  const R=S.rules;
+  return S.inv.map(it=>{
+    const card=BY[it.id], c=consensus(card,it.cond), target=roundPrice(c.listAt,R.round);
+    const diff=target-it.sticker, p=diff/it.sticker;
+    const needs=Math.abs(p)>=R.th/100&&Math.abs(diff)>=R.min&&(R.dir==='both'||(R.dir==='up'&&diff>0)||(R.dir==='down'&&diff<0));
+    return {...it,card,c,target,diff,p,needs};
+  });
+}
+function renderNav(){
+  const n=repriceList().filter(r=>r.needs).length;
+  const open=CAP.uid?LIVE.listings.filter(L=>BY[L.cardId]&&!L.settled&&!LIVE.votes[CAP.uid]?.picks?.[L.id]).length:0;
+  const cnt={reprice:n,cond:open};
+  document.getElementById('rail').innerHTML=NAV.map(([k,t,s])=>`<button class="navbtn" data-nav="${k}" ${S.view===k?'aria-current="page"':''}><b>${t}${cnt[k]?`<span class="nav-count">${cnt[k]}</span>`:''}</b><span>${s}</span></button>`).join('');
+}
+function render(){
+  const main=document.getElementById('main'), ae=document.activeElement;
+  const aid=ae&&ae.id&&main.contains(ae)?ae.id:null; let sel=null;
+  try{if(aid&&ae.selectionStart!=null)sel=[ae.selectionStart,ae.selectionEnd]}catch(_){}
+  renderNav(); paintTok();
+  main.innerHTML=({price:viewPrice,scan:viewScan,reprice:viewReprice,deal:viewDeal,cond:viewCond,community:viewCommunity,why:viewWhy}[S.view]||viewPrice)();
+  if(aid){const el=document.getElementById(aid);if(el&&!el.disabled){el.focus({preventScroll:true});if(sel)try{el.setSelectionRange(sel[0],sel[1])}catch(_){}}}
+  after();
+  persist();
+}
+function after(){
+  if(S.view==='price'){bindTilt();}
+  if(S.view==='community'){const m=document.getElementById('msgs');if(m){if(S.stick)m.scrollTop=m.scrollHeight;m.addEventListener('scroll',()=>{S.stick=m.scrollHeight-m.scrollTop-m.clientHeight<40})}}
+  paintPeople();
+}
+
+/* ---------- Price check ---------- */
+function viewPrice(){
+  const card=BY[S.cardId], c=consensus(card,S.cond);
+  const excl=c.rows.filter(r=>r.excl).length;
+  const lo=Math.min(c.lo,c.fair)*.8, hi=Math.max(c.hi,c.fair)*1.15, X=v=>((v-lo)/(hi-lo)*100).toFixed(1);
+  const cashLo=c.fair*.7, cashHi=c.fair*.8;
+  const confText={High:'Enough recent, same-condition sales to quote one price.',Medium:'Usable, but quote the range, not just the midpoint.',Low:'Thin or scattered sales. Quote a range and show your comps.'}[c.conf.l];
+  return `<div class="stack">
+  <section class="price-top">
+    <div class="hero-card" id="hero">${art(card,'big')}</div>
+    <div>
+      <div class="eyebrow">${card.game} · ${esc(card.set)} · ${esc(card.num)} · ${card.year}</div>
+      <h1 class="pt-title">${esc(card.name)}</h1>
+      <div class="seg" role="group" aria-label="Condition">${COND.map(k=>`<button data-cond="${k}" aria-pressed="${S.cond===k}" title="${COND_NAME[k]}">${k}</button>`).join('')}</div>
+      <div class="fair-row">
+        <div><div class="fair-lbl">Fair value · ${COND_NAME[S.cond]}, raw</div><div class="fair-big">${money(c.fair)}</div></div>
+        <div class="range-bar" aria-label="Defensible range ${money(c.lo)} to ${money(c.hi)}">
+          <div class="fair-lbl">Defensible range</div>
+          <div class="rb-track"><div class="rb-line"></div><div class="rb-band" style="left:${X(c.lo)}%;width:${(X(c.hi)-X(c.lo)).toFixed(1)}%"></div><div class="rb-mark" style="left:${X(c.fair)}%"></div></div>
+          <div class="rb-lbls"><span>${money(c.lo)}</span><span>${money(c.hi)}</span></div>
+        </div>
+      </div>
+      <div class="facts">
+        <div class="fact"><span class="k">Sticker it at</span><span class="v">${money(roundPrice(c.listAt,S.rules.round))}</span><span class="s">Upper half of the range, still defensible</span></div>
+        <div class="fact"><span class="k">Fair cash offer</span><span class="v">${money(cashLo)}–${money(cashHi)}</span><span class="s">70–80% of fair value</span></div>
+        <div class="fact"><span class="k">Confidence</span><span><span class="pill ${c.conf.k}">${c.conf.l}</span></span><span class="s">${confText}</span></div>
+      </div>
+      <p class="why-line">Built from <b>${c.n-excl} of ${c.n}</b> sales in the last 90 days. ${excl} excluded (lots and outliers). Recent sales, same-condition sales and sales with photos count more. Every one is listed below.</p>
+      <div class="actions">
+        <button class="btn primary" data-act="add-inv">Add to inventory</button>
+        <button class="btn" data-act="to-deal">Check an offer on this card</button>
+      </div>
+    </div>
+  </section>
+  <div class="grid2">
+    <section class="panel">
+      <div class="panel-h"><div><h2>Sales, last 90 days</h2><p>Each sale adjusted to ${COND_NAME[S.cond]}. Shaded band: defensible range.</p></div></div>
+      ${chart(card,c)}
+    </section>
+    <section class="panel">
+      <div class="panel-h"><div><h2>Why every app shows a different price</h2><p>Same card and condition, three sources, one scale.</p></div></div>
+      ${sourcePanel(card,c)}
+    </section>
+  </div>
+  <div class="grid2">
+    <section class="panel">
+      <div class="panel-h"><div><h2>The comps</h2><p>What counted, how much, and why some didn't.</p></div>
+        <button class="linkbtn" data-act="toggle-all">${S.showAll?'Show top 10':'Show all '+c.n}</button></div>
+      ${compTable(card,c)}
+    </section>
+    <section class="panel" id="grade-panel">${gradePanel(card)}</section>
+  </div></div>`;
+}
+function niceTicks(lo,hi,n=4){
+  const span=hi-lo, raw=span/n, mag=Math.pow(10,Math.floor(Math.log10(raw))), f=raw/mag;
+  const step=(f<1.5?1:f<3?2:f<7?5:10)*mag, t=[];
+  for(let v=Math.ceil(lo/step)*step;v<=hi+1e-9;v+=step)t.push(v);
+  return t;
+}
+let CHART_PTS=[];
+function chart(card,c){
+  const W=640,H=250,L=52,Rm=14,T=12,B=30;
+  const all=c.used.map(r=>r.norm).concat([c.lo,c.hi]);
+  let lo=Math.min(...all)*.9, hi=Math.max(...all)*1.08;
+  const ticks=niceTicks(lo,hi); lo=Math.min(lo,ticks[0]); hi=Math.max(hi,ticks[ticks.length-1]);
+  const x=d=>L+(90-d)/90*(W-L-Rm), y=v=>T+(1-(Math.min(hi,Math.max(lo,v))-lo)/(hi-lo))*(H-T-B);
+  let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Scatter of ${c.n} sales over 90 days with defensible range ${money(c.lo)} to ${money(c.hi)}">`;
+  ticks.forEach(v=>{s+=`<line x1="${L}" x2="${W-Rm}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)" stroke-width="1"/><text x="${L-8}" y="${y(v)+4}" text-anchor="end" font-size="11" fill="var(--muted)" font-family="var(--mono)">${money(v)}</text>`});
+  [90,60,30,0].forEach(d=>{s+=`<text x="${x(d)}" y="${H-8}" text-anchor="${d===90?'start':d===0?'end':'middle'}" font-size="11" fill="var(--muted)">${d?d+' days ago':'today'}</text>`});
+  s+=`<rect x="${L}" y="${y(c.hi)}" width="${W-L-Rm}" height="${Math.max(2,y(c.lo)-y(c.hi))}" fill="var(--accent)" opacity=".1"/>`;
+  // rolling median line
+  const pts=[];
+  for(let d=90;d>=0;d-=3){const w=c.used.filter(r=>Math.abs(r.days-d)<=12);if(w.length>=2)pts.push([x(d),y(wq(w.map(r=>({...r,w:r.wc*r.wp})),.5))])}
+  if(pts.length>1){s+=`<path d="M${pts.map(p=>p.map(n=>n.toFixed(1)).join(',')).join('L')}" fill="none" stroke="var(--ink)" stroke-width="2" stroke-linejoin="round" opacity=".7"/>`;
+    const e=pts[pts.length-1]; s+=`<circle cx="${e[0]}" cy="${e[1]}" r="4" fill="var(--ink)" stroke="var(--surface)" stroke-width="2"/>`}
+  CHART_PTS=c.rows;
+  c.rows.forEach((r,i)=>{
+    const cx=x(r.days),cy=y(r.norm),col=r.src==='eBay'?'var(--accent)':'var(--series-2)';
+    const shape=r.src==='eBay'?`<circle cx="${cx}" cy="${cy}" r="${r.excl?4.5:5}"`:`<rect x="${cx-4.5}" y="${cy-4.5}" width="9" height="9" rx="1.5"`;
+    s+=r.excl?`${shape} fill="var(--surface)" stroke="var(--faint)" stroke-width="1.5" stroke-dasharray="2 2"/>`:`${shape} fill="${col}" fill-opacity="${.35+.65*Math.min(1,r.wr+.2)}" stroke="var(--surface)" stroke-width="2"/>`;
+    s+=`<circle cx="${cx}" cy="${cy}" r="11" fill="transparent" data-pt="${i}" style="cursor:default"/>`;
+  });
+  s+='</svg>';
+  return `<div class="chart-wrap">${s}</div><div class="legend"><span><i style="background:var(--accent);border-radius:50%"></i>eBay sold</span><span><i style="background:var(--series-2);border-radius:2px"></i>TCGplayer sale</span><span><i style="border:1.5px dashed var(--faint);border-radius:50%"></i>Excluded</span><span><i style="height:2px;background:var(--ink);vertical-align:3px"></i>Rolling median</span><span>Faded marks are older and count less</span></div>`;
+}
+function sourcePanel(card,c){
+  const src=sources(card,S.cond,c);
+  const vals=src.map(s=>s.v).filter(isFinite).concat([c.lo,c.hi,c.fair]);
+  const lo=Math.min(...vals)*.9,hi=Math.max(...vals)*1.06,X=v=>((v-lo)/(hi-lo)*100).toFixed(1);
+  const rows=src.map(s=>{
+    const off=isFinite(s.v)&&(s.v<c.lo||s.v>c.hi);
+    return `<div class="src-row"><div class="src-name">${s.name}</div>
+      <div class="src-mid"><div class="src-note">${s.note}</div>
+      <div class="src-scale"><div class="band" style="left:${X(c.lo)}%;width:${X(c.hi)-X(c.lo)}%"></div>${isFinite(s.v)?`<div class="dot ${off?'off':''}" style="left:${X(s.v)}%" title="${money(s.v)}"></div>`:''}</div></div>
+      <div class="src-val">${money(s.v)}${off?`<div style="font-size:11px;color:var(--warn);font-family:var(--body)">${s.v>c.hi?'above':'below'} range</div>`:''}</div></div>`}).join('');
+  return rows+`<div class="src-row"><div class="src-name">Truecomp</div><div class="src-mid"><div class="src-note">Weighted by recency, condition match and photos. Lots and outliers removed.</div>
+    <div class="src-scale"><div class="band" style="left:${X(c.lo)}%;width:${X(c.hi)-X(c.lo)}%"></div><div class="dot" style="left:${X(c.fair)}%;background:var(--accent)"></div></div></div><div class="src-val">${money(c.fair)}</div></div>
+    <p class="note" style="margin:10px 0 0">Graded prices (Card Ladder, PSA): PSA 9 ${money(card.psa9)} · PSA 10 ${money(card.psa10)}. Graded sales are kept separate and never mixed into raw prices.</p>`;
+}
+function compTable(card,c){
+  const rows=[...c.rows].sort((a,b)=>(b.excl?-1:b.w)-(a.excl?-1:a.w));
+  const shown=S.showAll?rows:rows.slice(0,10);
+  const maxW=Math.max(...c.rows.map(r=>r.w));
+  return `<div class="tbl-wrap"><table><thead><tr><th>Sold</th><th>Where</th><th>Cond.</th><th class="r">Paid</th><th class="r">As ${S.cond}</th><th>Weight</th></tr></thead><tbody>
+  ${shown.map(r=>`<tr class="${r.excl?'excl':''}"><td class="num">${r.days===0?'today':r.days+'d ago'}</td>
+    <td>${r.src}${r.photo?'':' <span class="note">· no photo</span>'}${r.note?`<div class="note">${esc(r.note)}</div>`:''}</td>
+    <td><span class="cond-tag">${r.cond}</span></td><td class="r num"><span class="strike">${money(r.price)}</span></td><td class="r num">${money(r.norm)}</td>
+    <td>${r.excl?`<span class="pill neutral">${r.excl}</span>`:`<span class="wbar" style="width:${Math.max(3,r.w/maxW*56)}px"></span>`}</td></tr>`).join('')}
+  </tbody></table></div>`;
+}
+function gradePanel(card){
+  const G=S.grade;
+  return `<div class="panel-h"><div><h2>Grade it or sell it raw?</h2><p>For a Near Mint copy. Your odds, your fee, and the wait.</p></div></div>
+  <div class="fields">
+    <div class="field"><label for="grade-p10">Chance of a PSA 10: <b class="num" id="lbl-p10">${G.p10}%</b></label><input id="grade-p10" type="range" min="0" max="100" step="5" value="${G.p10}"></div>
+    <div class="field"><label for="grade-p9">Chance of a PSA 9: <b class="num" id="lbl-p9">${G.p9}%</b></label><input id="grade-p9" type="range" min="0" max="100" step="5" value="${G.p9}"></div>
+    <div class="field"><label for="grade-fee">Grading fee</label><div class="money-in"><input id="grade-fee" type="number" min="0" step="5" value="${G.fee}"></div></div>
+    <div class="field"><label for="grade-months">Turnaround (months)</label><input id="grade-months" type="number" min="0" max="24" value="${G.months}"></div>
+  </div>
+  <div id="grade-out">${gradeOut(card)}</div>`;
+}
+function gradeOut(card){
+  const G=S.grade, raw=consensus(card,'NM').fair;
+  const p8=Math.max(0,100-G.p10-G.p9);
+  const ev=G.p10/100*card.psa10+G.p9/100*card.psa9+p8/100*card.psa8, ship=12, net=ev-G.fee-ship, gain=net-raw;
+  const v=gain>raw*.2?{k:'good',t:'Worth grading'}:gain>0?{k:'warn',t:'Close call'}:{k:'bad',t:'Sell it raw'};
+  return `<div class="verdict-box">
+    <h3><span class="pill ${v.k}">${v.t}</span> <span class="num" style="font-size:16px">${gain>=0?'+':'−'}${money(Math.abs(gain))}</span></h3>
+    <div class="ev-rows">
+      <span>Expected graded sale (10 / 9 / ≤8 at ${G.p10} / ${G.p9} / ${p8}%)</span><span class="num">${money(ev)}</span>
+      <span>Grading fee + insured shipping</span><span class="num">−${money(G.fee+ship)}</span>
+      <span>Sell raw today instead</span><span class="num">−${money(raw)}</span>
+      <span class="tot">Expected gain from grading</span><span class="num tot">${gain>=0?'':'−'}${money(Math.abs(gain))}</span>
+    </div>
+    <p>That money is tied up for about <b>${G.months} months</b>. This card moved <b>${pct(card.trend/100)}</b> over the last 90 days, so the market can shift before the slab comes back.</p>
+  </div>`;
+}
+function bindTilt(){
+  const hero=document.getElementById('hero'); if(!hero||matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+  const el=hero.querySelector('.cardart');
+  hero.addEventListener('pointermove',e=>{const b=el.getBoundingClientRect(),px=(e.clientX-b.left)/b.width,py=(e.clientY-b.top)/b.height;
+    el.classList.add('live');el.style.setProperty('--rx',((px-.5)*22)+'deg');el.style.setProperty('--ry',((.5-py)*22)+'deg');el.style.setProperty('--mx',(px*100)+'%');el.style.setProperty('--my',(py*100)+'%')});
+  hero.addEventListener('pointerleave',()=>{el.classList.remove('live');el.style.setProperty('--rx','0deg');el.style.setProperty('--ry','0deg')});
+}
+
+/* ---------- Binder scan ---------- */
+function viewScan(){
+  const tot=S.scan.reduce((t,s)=>t+consensus(BY[s.id],s.cond).fair,0);
+  const changed=S.scan.filter(s=>s.cond!==s.orig).length;
+  return `<div class="stack">
+  <div class="view-h"><div><h1>Binder scan</h1><p>Price a whole 9-pocket page at once. Set the page's condition in one tap, then fix the exceptions. No more one card at a time.</p></div></div>
+  <div class="scan-layout">
+    <div class="binder ${S.scanPhoto?'photo':''}" id="binder" ${S.scanPhoto?`style="background-image:url('${S.scanPhoto}')"`:''}>
+      ${S.scan.map((s,i)=>{const card=BY[s.id],c=consensus(card,s.cond);return `<div class="pocket">
+        ${art(card)}<span class="pk-hit">${card.era==='vintage'?'check corners':'match 98%'}</span>
+        <div class="pk-name" title="${esc(card.name)}">${esc(card.name)}</div>
+        <div class="pk-meta"><button class="cond-btn ${s.cond!==s.orig?'changed':''}" data-scancond="${i}" aria-label="Condition ${COND_NAME[s.cond]}, tap to change">${s.cond}</button><span class="pk-price">${money(c.fair)}</span></div></div>`}).join('')}
+    </div>
+    <div class="stack">
+      <div class="panel">
+        <div class="eyebrow">This page</div>
+        <div class="tot-big">${money(tot)}</div>
+        <div class="note">9 cards · fair value, raw${changed?` · ${changed} condition${changed>1?'s':''} changed by you`:''}</div>
+        <div class="field" style="margin-top:14px"><label>Set the whole page to</label>
+          <div class="seg" role="group" aria-label="Set all conditions">${COND.slice(0,4).map(k=>`<button data-scanall="${k}" aria-pressed="${S.scan.every(s=>s.cond===k)}">${k}</button>`).join('')}</div></div>
+        <p class="note" style="margin:10px 0 14px">Tap any condition tag on a card to cycle NM → LP → MP → HP → DMG.</p>
+        <button class="btn primary" data-act="scan-add" style="width:100%;justify-content:center">Add 9 cards to inventory</button>
+      </div>
+      <label class="drop" id="drop" for="scan-file"><input id="scan-file" type="file" accept="image/*"><b style="color:var(--ink)">Upload a binder-page photo</b><br>or drop it here. JPG or PNG, straight-on, pockets in frame.</label>
+      <p class="note">Prototype: recognition is simulated with the sample page shown. Vintage cards get a "check corners" flag, because a photo can't reliably grade whitening or creases. You confirm condition; we don't guess it.</p>
+    </div>
+  </div></div>`;
+}
+
+/* ---------- Reprice ---------- */
+function viewReprice(){
+  const L=repriceList(), need=L.filter(r=>r.needs), net=need.reduce((t,r)=>t+r.diff,0);
+  const R=S.rules;
+  const sel=(id,label,opts,val)=>`<div class="field"><label for="${id}">${label}</label><select id="${id}">${opts.map(([v,t])=>`<option value="${v}" ${String(val)===String(v)?'selected':''}>${t}</option>`).join('')}</select></div>`;
+  return `<div class="stack">
+  <div class="view-h"><div><h1>Reprice</h1><p>Prices move every week. Stickers don't. Truecomp checks every card on your table and only flags the stickers that are worth peeling off, in the order you'll find them.</p></div></div>
+  <div class="summary">
+    <div><div class="k">Cards checked</div><div class="v">${L.length}</div></div>
+    <div><div class="k">Need a new sticker</div><div class="v" style="color:var(--warn)">${need.length}</div></div>
+    <div><div class="k">Leave alone</div><div class="v">${L.length-need.length}</div></div>
+    <div><div class="k">Net sticker change</div><div class="v ${net>=0?'chg-up':'chg-dn'}">${net>=0?'+':'−'}${money(Math.abs(net))}</div></div>
+  </div>
+  <section class="panel">
+    <div class="panel-h"><div><h2>Your repricing rules</h2><p>Small moves aren't worth a new sticker. Set what counts.</p></div></div>
+    <div class="rules">
+      ${sel('r-th','Resticker when price moves',[[5,'5% or more'],[10,'10% or more'],[15,'15% or more'],[20,'20% or more']],R.th)}
+      ${sel('r-min','…and by at least',[[0.5,'$0.50'],[1,'$1'],[2,'$2'],[5,'$5']],R.min)}
+      ${sel('r-round','Round stickers to',[['show','$1 under $50, $5 above'],['1','Nearest $1'],['99','.99 endings'],['50c','Nearest $0.50']],R.round)}
+      ${sel('r-dir','Which moves',[['both','Up and down'],['up','Only raises'],['down','Only drops']],R.dir)}
+    </div>
+  </section>
+  <section class="panel">
+    <div class="panel-h"><div><h2>Pull list</h2><p>Sorted by where each card sits. Highlighted rows need a new sticker.</p></div></div>
+    <div class="tbl-wrap"><table><thead><tr><th>Where</th><th>Card</th><th>Cond.</th><th class="r">On sticker</th><th class="r">New price</th><th class="r">Change</th><th></th></tr></thead><tbody>
+    ${L.map(r=>`<tr class="${r.needs?'needs':''}"><td class="loc">${esc(r.loc)}</td>
+      <td><button class="linkbtn" style="color:var(--ink);text-align:left" data-open="${r.id}" data-opencond="${r.cond}">${esc(r.card.name)}</button><div class="note">${esc(r.card.set)} · ${esc(r.card.num)}</div></td>
+      <td><span class="cond-tag">${r.cond}</span></td><td class="r num">${money(r.sticker)}</td><td class="r num">${money(r.target)}</td>
+      <td class="r num ${r.diff>0?'chg-up':r.diff<0?'chg-dn':''}">${Math.abs(r.p)<.005?'—':pct(r.p)}</td>
+      <td>${r.needs?'<span class="pill warn">Resticker</span>':'<span class="pill neutral">Keep</span>'}</td></tr>`).join('')}
+    </tbody></table></div>
+  </section>
+  <section class="panel">
+    <div class="panel-h"><div><h2>Label sheet · ${need.length} sticker${need.length===1?'':'s'}</h2><p>Only the labels that changed. Old price shown so you can check you have the right card.</p></div>
+      <div class="actions" style="margin:0"><button class="btn" data-act="copy-labels" ${need.length?'':'disabled'}>Copy label list</button><button class="btn sticker" data-act="mark-done" ${need.length?'':'disabled'}>Mark ${need.length} as restickered</button></div></div>
+    ${need.length?`<div class="sheet">${need.map(r=>`<div class="label"><div class="lp">${money(r.target)}</div><div class="ln">${esc(r.card.name)}</div><div class="lm"><span>${esc(r.card.num)} · ${r.cond}</span><span class="was">${money(r.sticker)}</span></div></div>`).join('')}</div>`
+      :`<p class="note">Nothing to resticker under these rules. Every sticker is within ${R.th}% of today's price.</p>`}
+  </section></div>`;
+}
+
+/* ---------- Deal check ---------- */
+function viewDeal(){
+  const card=BY[S.cardId], c=consensus(card,S.cond), D=S.deal;
+  if(D.offer==null)D.offer=Math.round(c.fair*.5);
+  if(D.vSticker==null)D.vSticker=roundPrice(c.listAt,S.rules.round);
+  if(D.vOffer==null)D.vOffer=Math.round(D.vSticker*.8);
+  return `<div class="stack">
+  <div class="view-h"><div><h1>Deal check</h1><p>Know where an offer stands before you shake on it. Works both ways: selling to a vendor, or countering a buyer at your table.</p></div>
+    <div class="seg" role="group" aria-label="Mode"><button data-mode="sell" aria-pressed="${D.mode==='sell'}">Someone's offering to buy mine</button><button data-mode="vend" aria-pressed="${D.mode==='vend'}">I'm vending, buyer countered</button></div></div>
+  <div class="grid2">
+    <section class="panel">
+      <div class="picked">${art(card)}<div style="min-width:0"><div style="font-weight:700">${esc(card.name)}</div><div class="note">${esc(card.set)} · ${esc(card.num)} · change card with the search bar</div></div></div>
+      <div class="field" style="margin-top:14px"><label>Condition</label><div class="seg" role="group" aria-label="Condition">${COND.map(k=>`<button data-cond="${k}" aria-pressed="${S.cond===k}">${k}</button>`).join('')}</div></div>
+      <div class="fields" style="margin-top:14px">
+      ${D.mode==='sell'
+        ?`<div class="field" style="grid-column:1/-1"><label for="offer-amt">Their cash offer</label><div class="money-in"><input id="offer-amt" type="number" min="0" step="1" value="${D.offer}"></div></div>`
+        :`<div class="field"><label for="v-sticker">Your sticker price</label><div class="money-in"><input id="v-sticker" type="number" min="0" step="1" value="${D.vSticker}"></div></div>
+          <div class="field"><label for="v-offer">Buyer's offer</label><div class="money-in"><input id="v-offer" type="number" min="0" step="1" value="${D.vOffer}"></div></div>
+          <div class="field" style="grid-column:1/-1"><label for="v-floor">Your floor: <b class="num" id="floor-lbl">${D.floor}% of fair value (${money(c.fair*D.floor/100)})</b></label><input id="v-floor" type="range" min="60" max="100" step="1" value="${D.floor}"></div>`}
+      </div>
+      <p class="note" style="margin-top:14px">Fair value for ${COND_NAME[S.cond]}: <b class="num">${money(c.fair)}</b>, range ${money(c.lo)}–${money(c.hi)}, confidence ${c.conf.l.toLowerCase()}. <button class="linkbtn" data-nav="price">See the comps</button></p>
+    </section>
+    <section class="panel" id="deal-out">${D.mode==='sell'?dealSell(card,c):dealVend(card,c)}</section>
+  </div></div>`;
+}
+function dealSell(card,c){
+  const o=+S.deal.offer||0, p=o/c.fair;
+  const z=p<.55?{k:'bad',t:'Lowball',d:'Well under what dealers normally pay. Walk, or counter with the comps.'}
+    :p<.7?{k:'warn',t:'Below typical',d:'Common at busy shows, but you can usually do better with a counter.'}
+    :p<.85?{k:'good',t:'Typical dealer cash',d:'A normal cash offer. Dealers need margin to resell.'}
+    :{k:'good',t:'Strong offer',d:'At or near full value. Usually seen as trade credit or from a collector.'};
+  const counter=Math.round(c.fair*.78);
+  const clamp=v=>Math.max(0,Math.min(120,v));
+  const zones=[[0,55,'var(--bad)'],[55,70,'var(--warn)'],[70,85,'var(--good)'],[85,120,'color-mix(in srgb,var(--good) 55%,var(--surface))']];
+  const scriptTxt=`Truecomp puts this ${card.name} in ${S.cond} at ${money(c.lo)} to ${money(c.hi)}, based on ${c.n} sales in the last 90 days. ${p<.7?`Could you do ${money(counter)}?`:'That works for me.'}`;
+  return `<div class="eyebrow">Their offer is</div>
+    <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap"><span class="fair-big">${Math.round(p*100)}%</span><span class="pill ${z.k}" style="font-size:13px">${z.t}</span></div>
+    <div class="note" style="margin-top:4px">of fair value (${money(o)} of ${money(c.fair)})</div>
+    <div class="gauge" aria-hidden="true">
+      <div class="g-mark" style="left:${clamp(p*100)/120*100}%"><span>${money(o)}</span><i></i></div>
+      <div class="g-track">${zones.map(([a,b,col])=>`<div style="flex:${b-a};background:${col};opacity:.75"></div>`).join('')}</div>
+      <div class="g-lbls"><span style="left:${27.5/1.2}%">Lowball</span><span style="left:${62.5/1.2}%">Below</span><span style="left:${77.5/1.2}%">Typical</span><span style="left:${102.5/1.2}%">Strong</span></div>
+    </div>
+    <p style="margin:6px 0 0">${z.d}</p>
+    ${p<.7?`<p class="note" style="margin-top:8px">"My table fees are high" is a real cost, but it's the dealer's cost. It doesn't change what your card sells for.</p>`:''}
+    <div class="eyebrow" style="margin-top:16px">What to say</div>
+    <div class="script" id="script-txt">${esc(scriptTxt)}</div>
+    <div class="actions"><button class="btn" data-act="copy-script">Copy</button></div>`;
+}
+function dealVend(card,c){
+  const D=S.deal, st=+D.vSticker||0, of=+D.vOffer||0, floor=c.fair*D.floor/100;
+  const mid=roundPrice((st+of)/2,S.rules.round), counter=Math.max(mid,roundPrice(floor,S.rules.round));
+  let v;
+  if(of>=st*.95)v={k:'good',t:'Take it',d:`Within 5% of your sticker. Not worth the back-and-forth.`};
+  else if(of>=floor)v={k:'good',t:`Take it, or counter at ${money(mid)}`,d:`Above your floor of ${money(floor)}. Meeting in the middle usually closes it.`};
+  else if(of>=c.fair*.6)v={k:'warn',t:`Counter at ${money(counter)}`,d:`Below your floor of ${money(floor)}. Countering keeps the buyer talking without going under it.`};
+  else v={k:'bad',t:'Decline, politely',d:`Under 60% of fair value. Show them the range (${money(c.lo)}–${money(c.hi)}) and hold.`};
+  return `<div class="eyebrow">Recommendation</div>
+    <h3 style="font-size:26px;font-stretch:115%;font-weight:850;margin-top:4px">${v.t}</h3>
+    <p style="margin:6px 0 0">${v.d}</p>
+    <div class="ev-rows" style="margin-top:16px">
+      <span>Your sticker</span><span class="num">${money(st)}</span>
+      <span>Buyer's offer</span><span class="num">${money(of)} <span class="note">(${Math.round(of/st*100)}% of sticker)</span></span>
+      <span>Fair value today</span><span class="num">${money(c.fair)}</span>
+      <span>Your floor</span><span class="num">${money(floor)}</span>
+    </div>
+    <p class="note" style="margin-top:14px">Set your floor once per case and you never have to do this math in your head with a line forming.</p>`;
+}
+
+/* ---------- Why ---------- */
+function viewWhy(){
+  const rows=[
+    ['Pricing takes hours, one card at a time','#3, #6','Binder scan prices 9 pockets from one photo, with page-level condition and one-tap exceptions.','Built'],
+    ['Restickering after prices move is the tedious part, not finding prices','#5','Reprice flags only stickers past your threshold, lists them in table order, and prints just those labels.','Built'],
+    ['Every app shows a different price, especially vintage and condition-sensitive cards','#4, #5, #6','One fair value plus a defensible range. Every comp is shown with its weight or the reason it was excluded.','Built'],
+    ['New collectors get lowballed, sometimes with "table fees" as the excuse','#2, #4','Deal check shows an offer as a % of fair value, in plain words, with a counter script.','Built'],
+    ['Negotiating at the table is friction','#3','Vendor mode: set a floor once and get take / counter / decline at a glance.','Built'],
+    ['Grading takes 8–10 months; the market moves meanwhile','#4','Grade-or-sell-raw math that counts fees, odds and the months your money is tied up.','Built'],
+    ['Search returns too much unrelated stuff','#6','Singles-only search with game filters and exact set-number matching (try "4/102").','Built'],
+    ['Condition has to be typed in by hand','#6','Page-level condition with tap-to-fix. We don\'t claim to grade from a photo.','Partly'],
+    ['Vintage condition pricing is "all over the place"; a camera can\'t judge condition','#4, #6','Condition check: members call condition from listing photos, blind, and are scored against the verified result. Community threads per listing.','Built'],
+    ['Tokens tradeable on exchanges like Binance or Coinbase','None','No interviewee asked for this. Tokens run on an internal ledger; see the conditions below before making them tradeable.','Open'],
+    ['Best features are paywalled','#6','Proposal: keep comps, ranges and repricing free. Business-model decision, not a product one.','Open'],
+    ['Hard to offload or trade; wants to connect with other vendors','#1','Not built. One mention so far. Worth probing in interviews 7–10.','Not built'],
+    ['Tap-to-pay on individual chase cards','#3','Not built. Needs a payments partner; tie it to the sticker price when it happens.','Not built'],
+  ];
+  const k={Built:'good',Partly:'warn',Open:'neutral','Not built':'neutral'};
+  return `<div class="stack">
+  <div class="view-h"><div><h1>Why Truecomp</h1><p>Every screen here answers something a collector or vendor told us in six interviews. Nothing was added just because other apps have it.</p></div></div>
+  <section class="panel"><div class="tbl-wrap"><table class="why"><thead><tr><th>What people told us</th><th>Who</th><th>What Truecomp does</th><th>Status</th></tr></thead><tbody>
+  ${rows.map(r=>`<tr><td>${esc(r[0])}</td><td class="who">${r[1]}</td><td>${esc(r[2])}</td><td><span class="pill ${k[r[3]]}">${r[3]}</span></td></tr>`).join('')}
+  </tbody></table></div></section>
+  <div class="grid2">
+    <section class="panel callout" style="border-left:3px solid var(--warn)"><h2>The counterpoint we built around</h2>
+      <p>Interview 5 said finding prices is already easy and existing apps are fine. His pain was updating physical stickers after prices change. So Truecomp isn't pitched as another price feed. The comp engine exists to feed Reprice and Deal check.</p></section>
+    <section class="panel callout" style="border-left:3px solid var(--faint)"><h2>What this prototype can't tell you yet</h2>
+      <p>Six interviews, all men aged 17–35, and Pokémon is the only game anyone named. Magic and sports cards are in the catalog but untested with those buyers. No large vendors or shop owners yet. Prices shown are generated samples, not live market data.</p></section>
+  </div>
+  <section class="panel callout" style="border-left:3px solid var(--bad)"><h2>Before tokens become a tradeable coin</h2>
+    <ul class="rules-list">
+      <li><b>Exchanges decide listings, not us.</b> Binance and Coinbase run their own review. A new coin with little trading volume usually starts on a decentralized exchange, if anywhere.</li>
+      <li><b>Securities and money-transmission law.</b> A token that people earn from the platform and can sell for cash may be regulated. Get crypto counsel before launch.</li>
+      <li><b>Minors.</b> Collectors include kids and teens (interviews 1, 2 and 4). Tradeable crypto rewards for under-18s is a hard problem.</li>
+      <li><b>Cash invites gaming.</b> Real money pays for bots, duplicate accounts and seller collusion. That needs identity checks, payout caps and fraud review first.</li>
+      <li><b>Taxes.</b> Rewards with cash value are usually taxable income, which may mean reporting for members.</li>
+    </ul>
+    <p>The ledger is already built so it can be exported later. Tokens can be spent on fee discounts or store credit first, which delivers the reward without these risks.</p></section>
+  </div>`;
+}
+
+/* ======================= community: live shared data ======================= */
+const CAP={ready:false,db:null,user:null,uid:null,isAdmin:false,readOnly:false,err:''};
+const LIVE={listings:[],votes:{},chat:{},got:false};
+const REWARD={exact:10,near:2};
+const FLAGS=['Corner whitening','Edge wear','Surface scratches','Crease or bend','Off-center','Print line'];
+const SOURCES=['Buyer confirmed on delivery','Graded by PSA','Truecomp in-hand inspection'];
+let writeQ=Promise.resolve();
+function queue(fn){const p=writeQ.then(fn);writeQ=p.catch(()=>{});return p}
+function liveRender(){if(S.view==='cond'||S.view==='community')render();else{renderNav();paintTok()}}
+(async()=>{
+  try{
+    if(window.claude&&typeof window.claude.use==='function'){
+      const [db,user]=await Promise.all([window.claude.use('db'),window.claude.use('user')]);
+      CAP.db=db;CAP.user=user;
+      if(user){const me=await user.me();CAP.uid=me.id;CAP.isAdmin=!!me.canEdit;const cw=await user.can('data.write');CAP.readOnly=cw===false}
+      if(db){
+        const onErr=()=>{CAP.err='Live updates stopped. Reload the page to reconnect.';liveRender()};
+        db.collection('listings').onSnapshot(s=>{LIVE.listings=s.docs.map(d=>({id:d.id,...d.data()}));LIVE.got=true;liveRender()},onErr);
+        db.collection('votes').onSnapshot(s=>{const v={};s.docs.forEach(d=>{v[d.id]=d.data()});LIVE.votes=v;liveRender()},onErr);
+        db.collection('chat').onSnapshot(s=>{const v={};s.docs.forEach(d=>{v[d.id]=d.data()});LIVE.chat=v;liveRender()},onErr);
+      }
+    }
+  }catch(e){}
+  CAP.ready=true;liveRender();
+})();
+const canAct=()=>!!(CAP.db&&CAP.uid&&!CAP.readOnly);
+const ci=k=>COND.indexOf(k);
+function stats(uid){
+  const picks=LIVE.votes[uid]?.picks||{}; let n=0,exact=0,tok=0,pending=0;
+  for(const L of LIVE.listings){const p=picks[L.id]; if(!p||!COND.includes(p.cond))continue;
+    if(!L.settled){pending++;continue}
+    if(p.ts>L.settled.ts)continue;
+    n++; const d=Math.abs(ci(p.cond)-ci(L.settled.cond));
+    if(d===0){exact++;tok+=REWARD.exact}else if(d===1)tok+=REWARD.near}
+  return {n,exact,tok,pending,acc:n?exact/n:null};
+}
+function tally(L){
+  const counts=Object.fromEntries(COND.map(k=>[k,0])),flags={},notes=[]; let total=0,voters=0;
+  for(const [uid,v] of Object.entries(LIVE.votes)){
+    const p=v&&v.picks&&v.picks[L.id]; if(!p||!COND.includes(p.cond))continue;
+    const st=stats(uid), w=.5+(st.n>=3?st.acc:.5);
+    counts[p.cond]+=w; total+=w; voters++;
+    (Array.isArray(p.flags)?p.flags:[]).forEach(f=>{if(FLAGS.includes(f))flags[f]=(flags[f]||0)+1});
+    if(p.note)notes.push({uid,note:String(p.note).slice(0,280),cond:p.cond,ts:+p.ts||0});
+  }
+  let top=null; for(const k of COND)if(!top||counts[k]>counts[top])top=k;
+  return {counts,total,voters,top:total?top:null,share:total?counts[top]/total:0,flags,notes};
+}
+function paintTok(){
+  const b=document.getElementById('tok'); if(!b)return;
+  if(!CAP.uid){b.hidden=true;return}
+  b.hidden=false; document.getElementById('tok-n').textContent=stats(CAP.uid).tok+' TC';
+}
+async function paintPeople(){
+  const els=[...document.querySelectorAll('[data-name],[data-avatar]')]; if(!els.length)return;
+  if(!CAP.user){els.forEach(e=>{if(e.dataset.name!=null)e.textContent='Member'});return}
+  const ids=[...new Set(els.map(e=>e.dataset.name||e.dataset.avatar))];
+  const ps=await CAP.user.profiles(ids);
+  els.forEach(e=>{const id=e.dataset.name||e.dataset.avatar,p=ps[id]; if(!p||!e.isConnected)return;
+    if(e.dataset.name!=null)e.textContent=p.name||(p.isMe?'You':'Member'); else e.src=p.avatarUrl});
+}
+function rel(ts){const s=(Date.now()-ts)/1000; if(s<60)return 'just now'; if(s<3600)return Math.floor(s/60)+'m ago'; if(s<86400)return Math.floor(s/3600)+'h ago'; return new Date(ts).toLocaleDateString(undefined,{month:'short',day:'numeric'})}
+function writeFail(e){
+  const c=e&&e.code;
+  if(c==='invalid_argument'||c==='not_granted'){CAP.readOnly=true;toast('Not saved: you need edit access to this page. Ask the owner to share it with you as an editor.')}
+  else if(c==='quota_exceeded')toast('Not saved: this page has run out of storage.');
+  else toast('Not saved. Check your connection and try again.');
+  render();
+}
+function gate(){
+  if(!CAP.ready)return `<div class="banner">Connecting to the community…</div>`;
+  if(!CAP.db)return `<div class="banner"><b>Community features aren't available in this view.</b> Open this page on claude.ai while signed in. Calls, tokens and chat are saved there and shared with everyone who has access.</div>`;
+  if(CAP.err)return `<div class="banner"><b>${CAP.err}</b></div>`;
+  if(!canAct())return `<div class="banner"><b>You can read along, but you can't make calls or post yet.</b> Ask the page owner to give you edit access.</div>`;
+  return '';
+}
+
+/* ---------- listing photos with rendered wear ---------- */
+function wearSVG(w,seed,side){
+  const r=rng(hash(seed+side)), k=side==='back'?1.25:1;
+  const c=Math.min(1,(+w.corners||0)*k), e=Math.min(1,(+w.edges||0)*k), sf=(+w.surface||0)*(side==='back'?.5:1);
+  let s=`<svg class="wear" viewBox="0 0 630 880" preserveAspectRatio="none" aria-hidden="true"><defs><radialGradient id="wh"><stop offset="0" stop-color="#fff"/><stop offset=".55" stop-color="#fff" stop-opacity=".8"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient></defs>`;
+  if(c>.03)[[0,0],[630,0],[0,880],[630,880]].forEach(([x,y])=>{const rad=10+52*c*(.55+.45*r()),op=Math.min(.95,c*(.6+.4*r()));s+=`<circle cx="${x}" cy="${y}" r="${rad.toFixed(1)}" fill="url(#wh)" opacity="${op.toFixed(2)}"/>`});
+  if(e>.03){const dash=[];for(let i=0;i<14;i++)dash.push(Math.round(10+r()*90*(1.2-e)),Math.round(6+r()*60*e));
+    s+=`<rect x="3" y="3" width="624" height="874" rx="28" fill="none" stroke="#fff" stroke-width="${(2+7*e).toFixed(1)}" stroke-dasharray="${dash.join(' ')}" opacity="${(.35+.55*e).toFixed(2)}"/>`}
+  for(let i=0,n=Math.round(sf*9);i<n;i++){const x=80+r()*470,y=120+r()*640,a=r()*Math.PI,l=50+r()*200;
+    s+=`<line x1="${x.toFixed(0)}" y1="${y.toFixed(0)}" x2="${(x+Math.cos(a)*l).toFixed(0)}" y2="${(y+Math.sin(a)*l).toFixed(0)}" stroke="#fff" stroke-width="${(.8+r()*1.4).toFixed(1)}" opacity="${(.35+.4*r()).toFixed(2)}" stroke-linecap="round"/>`}
+  if(w.crease){const y1=200+r()*300,y2=y1+120+r()*200,m=(y1+y2)/2-40;
+    s+=`<path d="M0 ${y1.toFixed(0)} Q315 ${m.toFixed(0)} 630 ${y2.toFixed(0)}" stroke="rgba(0,0,0,.35)" stroke-width="3" fill="none"/><path d="M0 ${(y1+4).toFixed(0)} Q315 ${(m+4).toFixed(0)} 630 ${(y2+4).toFixed(0)}" stroke="rgba(255,255,255,.7)" stroke-width="2.5" fill="none"/>`}
+  return s+'</svg>';
+}
+function phCard(L,side,corner){
+  const card=BY[L.cardId], w=L.wear||{}, cx=Math.min(.8,Math.max(.2,+w.centering||.5));
+  const pad=`padding-left:${(9*cx).toFixed(2)}%;padding-right:${(9*(1-cx)).toFixed(2)}%`;
+  const face=side==='back'?`<div class="cardback" style="${pad}"><div class="cb-in"><span></span></div></div>`:art(card,'',pad);
+  const pos=corner?{tl:'left:0;top:0',tr:'right:0;top:0',bl:'left:0;bottom:0',br:'right:0;bottom:0'}[corner]:'';
+  return `<div class="ph-card" style="${pos}">${face}${wearSVG(w,L.id,side)}</div>`;
+}
+
+/* ---------- Condition check ---------- */
+function viewCond(){
+  const head=`<div class="view-h"><div><h1>Condition check</h1><p>Look at the photos, call the condition, and earn tokens when your call matches the verified result. Calls are blind: you see the crowd only after you've locked yours in.</p></div></div>`;
+  const g=gate();
+  if(!CAP.db)return `<div class="stack">${head}${g}${rulesHTML()}</div>`;
+  const Ls=LIVE.listings.filter(L=>BY[L.cardId]).sort((a,b)=>(!!a.settled-!!b.settled)||(b.openedAt||0)-(a.openedAt||0));
+  if(!Ls.length)return `<div class="stack">${head}${g}<div class="panel"><h2>No listings to check yet</h2><p class="note">${LIVE.got?'When sellers list cards, they show up here for the community to call.':'Loading listings…'}</p></div></div>`;
+  if(!Ls.find(L=>L.id===S.lid))S.lid=Ls[0].id;
+  const L=Ls.find(x=>x.id===S.lid), me=CAP.uid?stats(CAP.uid):null;
+  return `<div class="stack">${head}${g}${walletHTML(me)}
+    <div class="cond-layout"><div class="lst" role="list">${Ls.map(listItem).join('')}</div>${detail(L)}</div>
+    ${rulesHTML()}</div>`;
+}
+function walletHTML(me){
+  return `<div class="summary">
+    <div><div class="k">Your tokens</div><div class="v">${me?me.tok:0} <span style="font-size:14px">TC</span></div></div>
+    <div><div class="k">Accuracy</div><div class="v">${me&&me.n?Math.round(me.acc*100)+'%':'—'}</div><div class="note">${me&&me.n?`${me.exact} exact of ${me.n} verified`:'No verified calls yet'}</div></div>
+    <div><div class="k">Waiting on verification</div><div class="v">${me?me.pending:0}</div></div>
+    <div><div class="k">Cash out</div><div style="margin-top:6px"><span class="pill neutral">Not live</span></div><div class="note">Internal ledger for now. <button class="linkbtn" data-nav="why">Why</button></div></div>
+  </div>`;
+}
+function listItem(L){
+  const card=BY[L.cardId], mine=CAP.uid&&LIVE.votes[CAP.uid]?.picks?.[L.id];
+  const st=L.settled?`<span class="pill good">Verified ${esc(L.settled.cond)}</span>`:`<span class="pill warn">Open</span>`;
+  return `<button class="lst-item" role="listitem" data-lid="${esc(L.id)}" aria-current="${L.id===S.lid}">${art(card)}<div style="min-width:0"><div class="lst-t">${esc(card.name)}</div><div class="lst-s">${st}<span>Seller: ${esc(L.claimed)}</span>${mine?`<span>· You: ${esc(mine.cond)}</span>`:''}</div></div></button>`;
+}
+function detail(L){
+  const card=BY[L.cardId], mine=CAP.uid&&LIVE.votes[CAP.uid]?.picks?.[L.id], t=tally(L), fair=consensus(card,L.claimed).fair, side=S.side;
+  const names={tl:'Top left',tr:'Top right',bl:'Bottom left',br:'Bottom right'};
+  const photo=side==='corners'?`<div class="zooms">${Object.keys(names).map(c=>`<div class="zoom">${phCard(L,'back',c)}<b>${names[c]}</b></div>`).join('')}</div>`:phCard(L,side);
+  return `<div class="ldetail">
+    <section class="panel">
+      <div class="panel-h"><div><div class="eyebrow">${card.game} · ${esc(card.set)} · ${esc(card.num)}</div><h2 style="font-size:20px;margin-top:2px">${esc(card.name)}</h2>
+        <p>Listed by ${esc(L.seller||'a seller')} · asking <b class="num">${money(+L.ask)}</b> · seller says <b>${COND_NAME[L.claimed]||esc(L.claimed)}</b></p></div></div>
+      <div class="seg" role="group" aria-label="Photo" style="margin-bottom:12px">${[['front','Front'],['back','Back'],['corners','Back corners 3×']].map(([k,tx])=>`<button data-side="${k}" aria-pressed="${side===k}">${tx}</button>`).join('')}</div>
+      <div class="stage">${photo}</div>
+      <p class="note" style="margin-top:10px">If it really is ${COND_NAME[L.claimed]}, fair value is <b class="num">${money(fair)}</b>. Each grade lower is worth less, so an honest call protects the buyer. <button class="linkbtn" data-room="l-${esc(L.id)}">Discuss this listing</button></p>
+    </section>
+    <section class="panel">${L.settled?settledHTML(L,t,mine):mine?crowdHTML(L,t,mine):callForm(L)}${adminHTML(L)}</section>
+  </div>`;
+}
+function callForm(L){
+  const ev=S.ev[L.id]||(S.ev[L.id]={cond:null,flags:[],note:''}), ok=canAct();
+  return `<div class="panel-h"><div><h2>Make your call</h2><p>Your call locks when you submit. Then you'll see what everyone else said.</p></div></div>
+    <div class="field"><label>Condition</label><div class="seg" role="group" aria-label="Your condition call">${COND.map(k=>`<button data-evcond="${k}" aria-pressed="${ev.cond===k}" title="${COND_NAME[k]}">${k}</button>`).join('')}</div></div>
+    <div class="field" style="margin-top:14px"><label>What did you see? (optional)</label><div class="flags">${FLAGS.map(f=>`<button class="chip" data-flag="${esc(f)}" aria-pressed="${ev.flags.includes(f)}">${f}</button>`).join('')}</div></div>
+    <div class="field" style="margin-top:14px"><label for="ev-note">Note for the crowd (optional)</label><input id="ev-note" type="text" maxlength="280" placeholder="e.g. Whitening on the back top-left corner" value="${esc(ev.note)}"></div>
+    <div class="actions"><button class="btn primary" data-act="submit-call" ${ok&&ev.cond?'':'disabled'}>Lock in my call${ev.cond?': '+ev.cond:''}</button></div>
+    <p class="note" style="margin-top:10px">An exact match with the verified condition pays ${REWARD.exact} TC. One grade off pays ${REWARD.near} TC.</p>`;
+}
+function distHTML(L,t,verified){
+  const max=Math.max(...COND.map(k=>t.counts[k]),1e-4);
+  return `<div class="dist">${COND.map(k=>`<div class="dist-row"><span class="cond-tag">${k}</span>
+    <div class="dist-mid"><div class="dist-bar ${verified===k?'ok':''}" style="width:${(t.counts[k]/max*80).toFixed(1)}%"></div>${L.claimed===k?'<em>seller</em>':''}${verified===k?'<em>verified</em>':''}</div>
+    <span class="num" style="text-align:right">${t.total?Math.round(t.counts[k]/t.total*100):0}%</span></div>`).join('')}</div>`;
+}
+function flagsNotes(t){
+  const fl=Object.entries(t.flags).sort((a,b)=>b[1]-a[1]);
+  return (fl.length?`<div class="eyebrow" style="margin-top:16px">Spotted by the crowd</div><div class="flags" style="margin-top:6px">${fl.map(([f,n])=>`<span class="chip" style="cursor:default">${esc(f)} · ${n}</span>`).join('')}</div>`:'')+
+    (t.notes.length?`<div class="eyebrow" style="margin-top:16px">Notes</div><div class="stack" style="gap:10px;margin-top:6px">${t.notes.sort((a,b)=>b.ts-a.ts).slice(0,8).map(n=>`<div class="note-row"><img data-avatar="${esc(n.uid)}" alt=""><div><b data-name="${esc(n.uid)}">Member</b> <span class="cond-tag">${esc(n.cond)}</span><div>${esc(n.note)}</div></div></div>`).join('')}</div>`:'');
+}
+function crowdHTML(L,t,mine){
+  const disagree=t.top&&t.top!==L.claimed;
+  return `<div class="panel-h"><div><h2>What the crowd sees</h2><p>${t.voters} call${t.voters===1?'':'s'} so far, weighted by each member's track record.</p></div></div>
+    <div class="verdict-box" style="margin-top:0"><h3>Crowd says ${t.top?COND_NAME[t.top]:'—'} <span class="pill ${disagree?'warn':'good'}">${disagree?'Disagrees with seller':'Agrees with seller'}</span></h3>
+      <p>You called <b>${COND_NAME[mine.cond]}</b>. Tokens are paid when the condition is verified, not by this vote.</p></div>
+    <div style="margin-top:14px">${distHTML(L,t)}</div>${flagsNotes(t)}`;
+}
+function settledHTML(L,t,mine){
+  const v=L.settled.cond; let res;
+  if(mine){const d=Math.abs(ci(mine.cond)-ci(v)), got=mine.ts>L.settled.ts?0:d===0?REWARD.exact:d===1?REWARD.near:0;
+    res=`<p>You called <b>${COND_NAME[mine.cond]}</b>. ${got?`You earned <b class="num">${got} TC</b>.`:'No tokens this time.'}</p>`}
+  else res=`<p>You didn't make a call on this one.</p>`;
+  const right=Object.values(LIVE.votes).filter(x=>x&&x.picks&&x.picks[L.id]&&x.picks[L.id].cond===v).length;
+  return `<div class="panel-h"><div><h2>Verified: ${COND_NAME[v]}</h2><p>${esc(L.settled.source||'Verified')} · ${right} of ${t.voters} called it exactly</p></div></div>
+    <div class="verdict-box" style="margin-top:0"><h3><span class="pill ${v===L.claimed?'good':'bad'}">${v===L.claimed?'Seller was accurate':'Seller said '+esc(L.claimed)}</span></h3>${res}</div>
+    <div style="margin-top:14px">${distHTML(L,t,v)}</div>${flagsNotes(t)}`;
+}
+function adminHTML(L){
+  if(!CAP.isAdmin||!CAP.db)return '';
+  const a=S.adm[L.id]||(S.adm[L.id]={cond:L.claimed,source:SOURCES[0]});
+  return `<div style="margin-top:18px;padding-top:16px;border-top:1px dashed var(--line)"><div class="eyebrow">Owner only · record the verified condition</div>
+    ${L.settled?`<div class="actions"><button class="btn" data-act="reopen">Reopen for calls</button></div>`:
+    `<div class="fields" style="margin-top:8px"><div class="field"><label for="adm-cond">Verified condition</label><select id="adm-cond">${COND.map(k=>`<option value="${k}" ${a.cond===k?'selected':''}>${COND_NAME[k]}</option>`).join('')}</select></div>
+     <div class="field"><label for="adm-src">Verified by</label><select id="adm-src">${SOURCES.map(s=>`<option ${a.source===s?'selected':''}>${s}</option>`).join('')}</select></div></div>
+     <div class="actions"><button class="btn sticker" data-act="settle">Verify and pay out</button></div>`}</div>`;
+}
+function rulesHTML(){
+  return `<section class="panel"><h2>How tokens work</h2><ul class="rules-list">
+    <li><b>Calls are blind.</b> You see the crowd only after yours is locked, so copying earns nothing.</li>
+    <li><b>Tokens follow the verified condition, never the majority.</b> Verified means the buyer's check on delivery, a grading company's result, or a Truecomp inspection.</li>
+    <li><b>Exact match: ${REWARD.exact} TC. One grade off: ${REWARD.near} TC.</b> Further off earns nothing and lowers your accuracy.</li>
+    <li><b>Track record counts.</b> Members with better accuracy carry more weight in the crowd call buyers see.</li>
+  </ul></section>`;
+}
+async function submitCall(){
+  const L=LIVE.listings.find(x=>x.id===S.lid), ev=S.ev[S.lid];
+  if(!L||!ev||!ev.cond||!canAct()||L.settled)return;
+  const uid=CAP.uid, mine=LIVE.votes[uid]?.picks||{};
+  if(mine[L.id])return;
+  const picks={...mine,[L.id]:{cond:ev.cond,flags:ev.flags.slice(0,6),note:ev.note.trim().slice(0,280),ts:Date.now()}};
+  LIVE.votes={...LIVE.votes,[uid]:{picks}}; render();
+  try{await queue(()=>CAP.db.doc('votes/'+uid).set({picks}));toast('Call locked: '+COND_NAME[ev.cond])}
+  catch(e){LIVE.votes={...LIVE.votes,[uid]:{picks:mine}};writeFail(e)}
+}
+async function settle(reopen){
+  const L=LIVE.listings.find(x=>x.id===S.lid); if(!L||!CAP.db)return;
+  const a=S.adm[L.id];
+  try{await queue(()=>CAP.db.doc('listings/'+L.id).update({settled:reopen?null:{cond:a.cond,source:a.source,ts:Date.now()}}));
+    toast(reopen?'Reopened for calls':`Verified as ${COND_NAME[a.cond]}. Tokens paid out.`)}
+  catch(e){writeFail(e)}
+}
+
+/* ---------- Community ---------- */
+function allMsgs(room){
+  const out=[];
+  for(const [uid,d] of Object.entries(LIVE.chat))(Array.isArray(d&&d.msgs)?d.msgs:[]).forEach(m=>{if(m&&m.room===room&&m.text)out.push({...m,uid})});
+  return out.sort((a,b)=>a.ts-b.ts).slice(-150);
+}
+function viewCommunity(){
+  const head=`<div class="view-h"><div><h1>Community</h1><p>Ask the crowd before you buy, sell or grade. Every listing has its own thread.</p></div></div>`;
+  const g=gate(); if(!CAP.db)return `<div class="stack">${head}${g}</div>`;
+  const rooms=[['general','General'],['condition-help','Condition help'],...LIVE.listings.filter(L=>BY[L.cardId]).map(L=>['l-'+L.id,BY[L.cardId].name])];
+  if(!rooms.find(r=>r[0]===S.room))S.room='general';
+  const room=rooms.find(r=>r[0]===S.room), msgs=allMsgs(S.room), ok=canAct();
+  const L=S.room.startsWith('l-')?LIVE.listings.find(x=>'l-'+x.id===S.room):null;
+  return `<div class="stack">${head}${g}<div class="chat-layout">
+    <nav class="rooms" aria-label="Threads">${rooms.map(([k,tx])=>`<button class="room" data-room="${esc(k)}" aria-current="${k===S.room}"># ${esc(tx)}</button>`).join('')}</nav>
+    <section class="panel chat"><div class="chat-h">${L?`<div class="picked" style="padding:6px">${art(BY[L.cardId])}<div style="min-width:0"><b>${esc(BY[L.cardId].name)}</b><div class="note">Seller says ${esc(L.claimed)} · ${L.settled?'verified '+esc(L.settled.cond):'open for calls'}</div></div><button class="btn" data-lid="${esc(L.id)}" data-go="cond" style="margin-left:auto">Open listing</button></div>`:`<h2># ${esc(room[1])}</h2>`}</div>
+      <div class="msgs" id="msgs" aria-live="polite">${msgs.length?msgs.map(m=>`<div class="msg"><img data-avatar="${esc(m.uid)}" alt=""><div><div class="msg-h"><b data-name="${esc(m.uid)}">Member</b><span class="note">${rel(m.ts)}</span></div><div class="msg-t">${esc(m.text)}</div></div></div>`).join('')
+        :`<p class="note">No messages here yet. Try: "Is that whitening on the back corner, or glare from the photo?"</p>`}</div>
+      <form class="composer" id="chat-form"><input id="chat-in" type="text" maxlength="500" autocomplete="off" aria-label="Message" placeholder="${ok?'Message # '+esc(room[1]):'Read-only'}" value="${esc(S.draft[S.room]||'')}" ${ok?'':'disabled'}><button class="btn primary" type="submit" ${ok?'':'disabled'}>Send</button></form>
+    </section>
+    <aside class="panel chat-side"><h2>Top evaluators</h2><p class="note" style="margin:2px 0 8px">Ranked by tokens earned on verified calls.</p>${leaderHTML()}</aside>
+  </div></div>`;
+}
+function leaderHTML(){
+  const rows=Object.keys(LIVE.votes).map(u=>({u,...stats(u)})).filter(r=>r.n||r.pending).sort((a,b)=>b.tok-a.tok||(b.acc||0)-(a.acc||0)).slice(0,10);
+  if(!rows.length)return `<p class="note">No calls yet. Make the first one in Condition check.</p>`;
+  return rows.map((r,i)=>`<div class="lb-row"><span class="num note">${i+1}</span><img data-avatar="${esc(r.u)}" alt=""><span style="min-width:0"><span class="ellip"><b data-name="${esc(r.u)}">Member</b>${r.u===CAP.uid?' <span class="note">(you)</span>':''}</span><span class="note ellip">${r.n?Math.round(r.acc*100)+'% exact · '+r.n+' verified':r.pending+' awaiting verification'}</span></span><span class="num">${r.tok} TC</span></div>`).join('');
+}
+async function postChat(){
+  const text=(S.draft[S.room]||'').trim(); if(!text||!canAct())return;
+  const uid=CAP.uid, mine=Array.isArray(LIVE.chat[uid]?.msgs)?LIVE.chat[uid].msgs:[];
+  const m={id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),room:S.room,text:text.slice(0,500),ts:Date.now()};
+  const msgs=[...mine,m].slice(-200);
+  LIVE.chat={...LIVE.chat,[uid]:{msgs}}; S.draft[S.room]=''; S.stick=true; render();
+  try{await queue(()=>CAP.db.doc('chat/'+uid).set({msgs}))}catch(e){LIVE.chat={...LIVE.chat,[uid]:{msgs:mine}};S.draft[S.room]=text;writeFail(e)}
+}
+
+/* ======================= search ======================= */
+let resIdx=0;
+function renderResults(){
+  const q=document.getElementById('q').value.trim().toLowerCase(), box=document.getElementById('results');
+  const terms=q.split(/\s+/).filter(Boolean);
+  let list=CATALOG.filter(c=>S.filter==='All'||c.game===S.filter).filter(c=>{
+    const hay=`${c.name} ${c.var} ${c.set} ${c.num} ${c.year} ${c.game}`.toLowerCase();
+    return terms.every(t=>hay.includes(t));
+  });
+  list.sort((a,b)=>(b.num.toLowerCase()===q)-(a.num.toLowerCase()===q));
+  resIdx=Math.min(resIdx,Math.max(0,list.length-1));
+  box.innerHTML=`<div class="chips">${['All','Pokémon','Magic','Sports'].map(g=>`<button class="chip" data-filter="${g}" aria-pressed="${S.filter===g}">${g}</button>`).join('')}<span class="note" style="margin-left:auto;align-self:center">Singles only · no sealed, lots or bulk</span></div>`+
+    (list.length?list.map((c,i)=>`<button class="res ${i===resIdx?'on':''}" data-pick="${c.id}">${art(c)}<div style="min-width:0"><div class="res-t">${esc(c.name)} <span class="res-s">${esc(c.var)}</span></div><div class="res-s">${esc(c.set)} · ${esc(c.num)} · ${c.year}</div></div><span class="res-p num">${money(consensus(c,'NM').fair)} NM</span></button>`).join('')
+      :`<p class="note" style="padding:8px">No singles match "${esc(q)}". Try a set number like 4/102 or fewer words.</p>`);
+  box.hidden=false; box._list=list;
+}
+function pick(id){S.cardId=id;S.showAll=false;S.deal.offer=null;S.deal.vSticker=null;S.deal.vOffer=null;if(S.view!=='deal')S.view='price';
+  document.getElementById('results').hidden=true;document.getElementById('q').value='';document.getElementById('q').blur();render();scrollTo({top:0,behavior:'smooth'})}
+const q=document.getElementById('q');
+q.addEventListener('focus',renderResults);
+q.addEventListener('input',()=>{resIdx=0;renderResults()});
+q.addEventListener('keydown',e=>{const box=document.getElementById('results'),L=box._list||[];
+  if(e.key==='ArrowDown'){e.preventDefault();resIdx=Math.min(L.length-1,resIdx+1);renderResults()}
+  else if(e.key==='ArrowUp'){e.preventDefault();resIdx=Math.max(0,resIdx-1);renderResults()}
+  else if(e.key==='Enter'&&L[resIdx])pick(L[resIdx].id);
+  else if(e.key==='Escape'){box.hidden=true;q.blur()}});
+document.addEventListener('pointerdown',e=>{if(!e.target.closest('#search'))document.getElementById('results').hidden=true});
+
+/* ======================= events ======================= */
+function toast(t){const el=document.getElementById('toast');el.textContent=t;el.hidden=false;clearTimeout(toast._t);toast._t=setTimeout(()=>el.hidden=true,2400)}
+async function copy(text){try{await navigator.clipboard.writeText(text);toast('Copied')}catch(e){toast('Copy blocked here. Select the text and copy it manually.')}}
+document.addEventListener('click',e=>{
+  const t=e.target.closest('button,[data-nav]'); if(!t)return; const d=t.dataset;
+  if(d.filter){S.filter=d.filter;resIdx=0;renderResults();q.focus();return}
+  if(d.pick){pick(d.pick);return}
+  if(d.nav){S.view=d.nav;render();scrollTo({top:0});return}
+  if(d.lid){S.lid=d.lid;S.side='front';if(d.go){S.view=d.go;scrollTo({top:0})}render();return}
+  if(d.side){S.side=d.side;render();return}
+  if(d.evcond){const ev=S.ev[S.lid];if(ev){ev.cond=d.evcond;render()}return}
+  if(d.flag){const ev=S.ev[S.lid];if(ev){ev.flags=ev.flags.includes(d.flag)?ev.flags.filter(f=>f!==d.flag):[...ev.flags,d.flag];render()}return}
+  if(d.room){S.room=d.room;S.view='community';S.stick=true;render();scrollTo({top:0});return}
+  if(d.cond){S.cond=d.cond;S.deal.offer=null;S.deal.vSticker=null;S.deal.vOffer=null;render();return}
+  if(d.mode){S.deal.mode=d.mode;render();return}
+  if(d.open){S.cardId=d.open;S.cond=d.opencond;S.view='price';render();scrollTo({top:0});return}
+  if(d.scancond!=null){const s=S.scan[+d.scancond];s.cond=COND[(COND.indexOf(s.cond)+1)%COND.length];render();return}
+  if(d.scanall){S.scan.forEach(s=>{s.cond=d.scanall;s.orig=d.scanall});render();return}
+  const a=d.act;
+  if(a==='toggle-all'){S.showAll=!S.showAll;render()}
+  if(a==='to-deal'){S.view='deal';render();scrollTo({top:0})}
+  if(a==='add-inv'){const c=consensus(BY[S.cardId],S.cond);S.inv.push({key:S.cardId+'-'+Date.now(),id:S.cardId,cond:S.cond,loc:'New · unsorted',sticker:roundPrice(c.listAt,S.rules.round)});render();toast(`Added ${BY[S.cardId].name} (${S.cond}) to inventory`)}
+  if(a==='scan-add'){S.scan.forEach((s,i)=>{const c=consensus(BY[s.id],s.cond);S.inv.push({key:s.id+'-scan-'+Date.now()+i,id:s.id,cond:s.cond,loc:`Binder B · p.1 slot ${i+1}`,sticker:roundPrice(c.listAt,S.rules.round)})});render();toast('Added 9 cards to inventory')}
+  if(a==='copy-labels'){const L=repriceList().filter(r=>r.needs);copy(['Location\tCard\tNumber\tCond\tOld\tNew',...L.map(r=>[r.loc,r.card.name,r.card.num,r.cond,money(r.sticker),money(r.target)].join('\t'))].join('\n'))}
+  if(a==='mark-done'){const L=repriceList().filter(r=>r.needs);L.forEach(r=>{S.inv.find(i=>i.key===r.key).sticker=r.target});render();toast(`${L.length} sticker${L.length===1?'':'s'} updated`)}
+  if(a==='copy-script')copy(document.getElementById('script-txt').textContent);
+  if(a==='submit-call')submitCall();
+  if(a==='settle')settle(false);
+  if(a==='reopen')settle(true);
+});
+document.addEventListener('submit',e=>{if(e.target.id==='chat-form'){e.preventDefault();postChat()}});
+document.addEventListener('input',e=>{
+  const id=e.target.id, v=e.target.value, card=BY[S.cardId];
+  if(id==='ev-note'){if(S.ev[S.lid])S.ev[S.lid].note=v;return}
+  if(id==='chat-in'){S.draft[S.room]=v;return}
+  if(id.startsWith('grade-')){const G=S.grade;
+    if(id==='grade-p10'){G.p10=+v;if(G.p9>100-G.p10){G.p9=100-G.p10;document.getElementById('grade-p9').value=G.p9}}
+    if(id==='grade-p9'){G.p9=Math.min(+v,100-G.p10);e.target.value=G.p9}
+    if(id==='grade-fee')G.fee=Math.max(0,+v||0); if(id==='grade-months')G.months=Math.max(0,+v||0);
+    document.getElementById('lbl-p10').textContent=G.p10+'%';document.getElementById('lbl-p9').textContent=G.p9+'%';
+    document.getElementById('grade-out').innerHTML=gradeOut(card);
+    return}
+  if(id==='offer-amt'||id==='v-sticker'||id==='v-offer'||id==='v-floor'){
+    const D=S.deal; if(id==='offer-amt')D.offer=v; if(id==='v-sticker')D.vSticker=v; if(id==='v-offer')D.vOffer=v; if(id==='v-floor')D.floor=+v;
+    const c=consensus(card,S.cond);
+    document.getElementById('deal-out').innerHTML=D.mode==='sell'?dealSell(card,c):dealVend(card,c);
+    const fl=document.getElementById('floor-lbl'); if(fl)fl.textContent=`${D.floor}% of fair value (${money(c.fair*D.floor/100)})`;
+  }
+});
+document.addEventListener('change',e=>{
+  const id=e.target.id,v=e.target.value,R=S.rules;
+  if(id==='adm-cond'||id==='adm-src'){const a=S.adm[S.lid];if(a){if(id==='adm-cond')a.cond=v;else a.source=v}return}
+  if(id==='r-th')R.th=+v; else if(id==='r-min')R.min=+v; else if(id==='r-round')R.round=v; else if(id==='r-dir')R.dir=v;
+  else if(id==='scan-file'){loadPhoto(e.target.files[0]);return} else return;
+  render();
+});
+function loadPhoto(f){if(!f||!f.type.startsWith('image/'))return toast('That file isn\'t an image. Use a JPG or PNG.');
+  const r=new FileReader();r.onload=()=>{S.scanPhoto=r.result;S.scan=SAMPLE_PAGE.map(([id,cond])=>({id,cond,orig:cond}));render();toast('Page read: 9 pockets matched')};r.readAsDataURL(f)}
+document.addEventListener('dragover',e=>{const d=e.target.closest&&e.target.closest('#drop');if(d){e.preventDefault();d.classList.add('over')}});
+document.addEventListener('dragleave',e=>{const d=e.target.closest&&e.target.closest('#drop');if(d)d.classList.remove('over')});
+document.addEventListener('drop',e=>{const d=e.target.closest&&e.target.closest('#drop');if(d){e.preventDefault();loadPhoto(e.dataTransfer.files[0])}});
+
+/* chart tooltip */
+const tip=document.getElementById('tip');
+document.addEventListener('pointerover',e=>{const i=e.target.dataset&&e.target.dataset.pt;if(i==null)return;const r=CHART_PTS[+i];
+  tip.innerHTML=`<b>${money(r.price)}</b> · ${r.src} · ${r.cond}<br>${r.days===0?'Sold today':`Sold ${r.days} days ago`}${r.photo?'':' · no photo'}<br>As ${S.cond}: <b>${money(r.norm)}</b>${r.note?`<br>${esc(r.note)}`:''}${r.excl?`<br>Excluded: ${r.excl}`:''}`;
+  tip.hidden=false;const b=e.target.getBoundingClientRect();tip.style.left=Math.min(innerWidth-250,b.right+6)+'px';tip.style.top=Math.max(8,b.top-10)+'px'});
+document.addEventListener('pointerout',e=>{if(e.target.dataset&&e.target.dataset.pt!=null)tip.hidden=true});
+
+render();
+</script>
+
+</body></html>
